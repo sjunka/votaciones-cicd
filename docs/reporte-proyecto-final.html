@@ -51,7 +51,7 @@
 <p class="sub">Integración y Entrega Continua de Software (SI6008), EAFIT. Equipo: Sergio Junca y Valeria Cardona Urrea. Fecha del reporte: 18 nov 2026 (datos verificados ese día). Presentación: sábado 21 nov, 8 am, 15 minutos más preguntas.</p>
 
 <div class="box">
-<b>Estado en una línea:</b> el pipeline corrió completo en AWS. Staging y producción están en la versión 1.0.8 (commit c5a00d4), el rollback automático y el botón de pánico se probaron con runs reales, y SonarCloud y Docker Hub están activos. Pendiente: <span class="wait">Discord</span> (falta el webhook, no hay mensajes) y <span class="wait">Valeria</span> (invitación sin aceptar, aún no aprueba PR). Pasos en <code>docs/pasos-para-activar.md</code>.
+<b>Estado en una línea:</b> el pipeline corrió completo en AWS. Staging y producción están en la versión 1.0.12 (commit ce132af), el rollback automático y el botón de pánico se probaron con runs reales, y SonarCloud y Docker Hub están activos. Pendiente: <span class="wait">Discord</span> (falta el webhook, no hay mensajes) y <span class="wait">Valeria</span> (invitación sin aceptar, aún no aprueba PR). Pasos en <code>docs/pasos-para-activar.md</code>.
 </div>
 
 <h2>1. Qué pedía el proyecto</h2>
@@ -102,7 +102,7 @@
 <tr><td>Checkout y build</td><td><code>build-and-test</code>: checkout con historial, <code>docker build</code> de las 2 imágenes.</td><td><span class="ok">Corrió</span></td></tr>
 <tr><td>Pruebas estáticas</td><td>Black, Flake8, Pylint, ESLint y SonarCloud. Local: Black y ESLint sin errores, Flake8 sin hallazgos, Pylint 10/10.</td><td><span class="ok">Corrió</span></td></tr>
 <tr><td>Unitarias y cobertura</td><td>pytest con moto (API, 97,32 %) y Vitest (web, 100 %), umbral de 80 %.</td><td><span class="ok">Corrió</span></td></tr>
-<tr><td>Release: artefacto</td><td>Imágenes <code>votaciones-api</code> y <code>votaciones-web</code> con <code>1.0.N</code> y SHA, y Release <code>v1.0.N</code>. Hay v1.0.3 y v1.0.8.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>Release: artefacto</td><td>Imágenes <code>votaciones-api</code> y <code>votaciones-web</code> con <code>1.0.N</code> y SHA, y Release <code>v1.0.N</code>. Hay v1.0.3, v1.0.8 y v1.0.12.</td><td><span class="ok">Hecho</span></td></tr>
 <tr><td>IaC</td><td><code>infra/</code> con Terraform 1.17.1: ALB, 2 servicios ECS, DynamoDB, logs. <code>fmt</code> y <code>validate</code> corren en CI.</td><td><span class="ok">Validado</span></td></tr>
 <tr><td>Deploy infra y app, 2 ambientes</td><td><code>deploy.yml</code> con workspace <code>staging</code> y <code>production</code>; espera la versión en <code>/api/health</code>.</td><td><span class="ok">Hecho</span></td></tr>
 <tr><td>Pruebas pre-prod</td><td>Integración de la API y E2E con Selenium contra staging (<code>test-staging</code>). El E2E encontró un bug real.</td><td><span class="ok">Hecho</span></td></tr>
@@ -139,7 +139,11 @@
 <tr><td>44344815777</td><td><span class="ok">Verde</span></td><td>Botón de pánico en producción, sin versión: volvió a la v1.0.3 (la Release anterior a la actual), smoke en verde.</td></tr>
 <tr><td>44345534299</td><td><span class="ok">Verde</span></td><td>Botón de pánico en producción, versión 1.0.8: restauró la 1.0.8.</td></tr>
 </table>
-<p class="small">El PR 5 alinea las exclusiones de cobertura de SonarCloud con las de Vitest (Sonar mostraba 45,3 % porque contaba <code>pages</code> y <code>components</code>, que son solo vista) y crea otra Release. Estaba en curso al escribir este reporte.</p>
+<table>
+<tr><th style="width:14%">Run</th><th style="width:14%">Estado</th><th>Qué pasó</th></tr>
+<tr><td>44347524673</td><td><span class="fail">Rojo</span> en CI</td><td>Merge del PR 5, que alinea las exclusiones de cobertura de Sonar con las de Vitest (Sonar mostraba 45,3 % porque contaba <code>pages</code> y <code>components</code>). El quality gate falló por cobertura del código nuevo: Sonar también analizaba la app de <code>sustentacion/</code>. No llegó a AWS.</td></tr>
+<tr><td>44348025068</td><td><span class="ok">Verde</span></td><td>Merge del PR 6, que excluye <code>sustentacion/</code> y <code>docs/</code> del análisis. Quality gate Passed, cobertura 98,5 %, 9 min 42 s con la aprobación. Release v1.0.12, staging y producción en esa versión.</td></tr>
+</table>
 
 <h3>Particularidades</h3>
 <table>
@@ -185,15 +189,15 @@
 <tr><td>API: pytest con moto</td><td><span class="ok">Pasó</span> 21 pruebas, cobertura 97,32 % (mínimo 80 %). Black sin cambios, Flake8 sin hallazgos, Pylint 10,00/10.</td></tr>
 <tr><td>Web: Vitest y ESLint</td><td><span class="ok">Pasó</span> 12 pruebas, 100 % de cobertura. ESLint sin errores.</td></tr>
 <tr><td><code>tests/</code>: integración, E2E y smoke</td><td><span class="ok">Pasó</span> 11 pruebas, contra <code>docker compose</code> y contra staging dentro del pipeline.</td></tr>
-<tr><td>Staging y producción en AWS</td><td><span class="ok">Activos</span> ambos en la versión 1.0.8 (commit c5a00d4), cuenta 278835524469, us-east-1.</td></tr>
+<tr><td>Staging y producción en AWS</td><td><span class="ok">Activos</span> ambos en la versión 1.0.12 (commit ce132af), cuenta 278835524469, us-east-1.</td></tr>
 <tr><td>Run exitoso, rollback automático, botón de pánico</td><td><span class="ok">Hecho</span> runs 44342859850, 44340166676, 44344815777 y 44345534299 (tabla de la sección 4).</td></tr>
 <tr><td>SonarCloud</td><td><span class="ok">Passed</span> quality gate de <code>sjunka_votaciones-cicd</code> (Sonar way, sobre código nuevo). Análisis automático apagado. Hallazgos abiertos en la sección 6.</td></tr>
-<tr><td>Releases e imágenes</td><td><span class="ok">Hecho</span> Releases v1.0.3 y v1.0.8. Docker Hub: <code>sjunka/votaciones-api</code> y <code>sjunka/votaciones-web</code> con etiquetas <code>1.0.N</code> y SHA.</td></tr>
+<tr><td>Releases e imágenes</td><td><span class="ok">Hecho</span> Releases v1.0.3, v1.0.8 y v1.0.12. Docker Hub: <code>sjunka/votaciones-api</code> y <code>sjunka/votaciones-web</code> con etiquetas <code>1.0.N</code> y SHA.</td></tr>
 <tr><td>Mensajes de Discord</td><td><span class="wait">Pendiente</span> falta el webhook.</td></tr>
 </table>
 <table>
 <tr><th style="width:30%">Métrica</th><th>Valor</th></tr>
-<tr><td>Intentos de despliegue a producción</td><td>4: 2 buenos y 2 con falla provocada (50 %)</td></tr>
+<tr><td>Intentos de despliegue a producción</td><td>5: 3 buenos (v1.0.3, v1.0.8 y v1.0.12) y 2 con falla provocada (40 %)</td></tr>
 <tr><td>Commit a producción</td><td>9 min 52 s, con la aprobación incluida (run 44342859850)</td></tr>
 <tr><td>Recuperación tras el smoke en rojo</td><td>Unos 3 minutos: smoke rojo a las 16:00 UTC, smoke del rollback en verde a las 16:03 UTC</td></tr>
 </table>
@@ -212,7 +216,7 @@
 <tr><td>Análisis automático de SonarCloud apagado</td><td>El análisis lo corre el job <code>build-and-test</code>, que es el que aplica el quality gate.</td></tr>
 </table>
 <div class="box warn"><b>Hallazgos abiertos de SonarCloud:</b> el análisis general da Security D (46 issues, casi todos de los workflows: acciones sin fijar a un SHA y <code>pip install</code> sin hashes) y Reliability C (7 issues). El quality gate pasa porque mide el código nuevo. No los ocultamos.</div>
-<div class="box warn"><b>Ojo:</b> el rollback exige una Release previa. Ya hay dos (v1.0.3 y v1.0.8).</div>
+<div class="box warn"><b>Ojo:</b> el rollback exige una Release previa. Ya hay tres (v1.0.3, v1.0.8 y v1.0.12).</div>
 
 <h2>7. Qué sigue</h2>
 <ol>

@@ -130,7 +130,7 @@ Ambientes de GitHub: `staging`, `production` (revisor `sjunka`; `valri2104` est�
 |---|---|
 | Repositorio | https://github.com/sjunka/votaciones-cicd |
 | Sustentación | https://sjunka.github.io/votaciones-cicd/ |
-| Releases | https://github.com/sjunka/votaciones-cicd/releases (v1.0.3 y v1.0.8 al 2026-11-18) |
+| Releases | https://github.com/sjunka/votaciones-cicd/releases (v1.0.3, v1.0.8 y v1.0.12 al 2026-11-18) |
 | Actions | https://github.com/sjunka/votaciones-cicd/actions |
 | Staging | http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com |
 | Producción | http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com |
