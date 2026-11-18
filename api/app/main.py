@@ -54,9 +54,7 @@ def create_app():
             store.ping()
         except (BotoCoreError, ClientError):
             return jsonify({"status": "error", **info, "database": "error"}), 503
-        # DEMO: falla provocada solo en producción para probar el rollback automático
-        estado = "degraded" if info["environment"] == "production" else "ok"
-        return jsonify({"status": estado, **info, "database": "ok"})
+        return jsonify({"status": "ok", **info, "database": "ok"})
 
     @app.post("/api/polls")
     def create_poll():
