@@ -32,7 +32,10 @@ export const closePoll = (id, code) =>
 export function voterId() {
   let v = localStorage.getItem("voter");
   if (!v) {
-    v = crypto.randomUUID();
+    // randomUUID solo existe en contextos seguros (HTTPS); el ALB sirve por HTTP
+    v = crypto.randomUUID
+      ? crypto.randomUUID()
+      : Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
     localStorage.setItem("voter", v);
   }
   return v;
