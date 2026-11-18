@@ -1,0 +1,31 @@
+# Stack local: DynamoDB Local + api + web + gateway que emula el ALB
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    command: -jar DynamoDBLocal.jar -inMemory
+
+  api:
+    build: ./api
+    environment:
+      APP_ENV: local
+      TABLE_NAME: votaciones-local
+      AWS_REGION: us-east-1
+      DYNAMODB_ENDPOINT: http://dynamodb:8000
+      # DynamoDB Local acepta cualquier credencial
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    depends_on:
+      - dynamodb
+
+  web:
+    build: ./web
+
+  gateway:
+    image: nginx:alpine
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+      - web

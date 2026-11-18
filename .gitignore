@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.terraform/
+*.tfstate*
+*.tfvars
+.env
+__pycache__/
+venv/
+.venv/
+coverage/
+htmlcov/
+.coverage
+.pytest_cache/
+.DS_Store

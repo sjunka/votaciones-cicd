@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Reporte Proyecto Final</title>
+<style>
+  @page { size: Letter; margin: 16mm 15mm; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; color: #1d2329; line-height: 1.45; }
+  h1 { font-size: 20pt; margin: 0 0 2px; }
+  h2 { font-size: 13.5pt; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #2b6cb0; color: #1a4a7a; page-break-after: avoid; }
+  h3 { font-size: 11pt; margin: 14px 0 6px; page-break-after: avoid; }
+  p { margin: 5px 0; }
+  .sub { color: #5a6570; margin: 0 0 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 9.5pt; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+  th, td { border: 1px solid #cfd6dd; padding: 5px 7px; text-align: left; vertical-align: top; }
+  th { background: #eef2f6; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.8pt; background: #f1f3f5; padding: 0 3px; border-radius: 3px; }
+  .ok, .fail, .wait, .skip { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 8.5pt; font-weight: 600; white-space: nowrap; }
+  .ok { background: #d9f2df; color: #1e6b33; }
+  .fail { background: #fbdcdc; color: #9b1c1c; }
+  .wait { background: #fff1c9; color: #7a5b00; }
+  .skip { background: #e6e9ed; color: #4a5560; }
+  .box { border: 1px solid #cfd6dd; border-left: 4px solid #2b6cb0; background: #f7f9fb; padding: 8px 12px; margin: 8px 0; page-break-inside: avoid; }
+  .warn { border-left-color: #c58a00; background: #fffaf0; }
+  ol, ul { margin: 4px 0 8px 20px; padding: 0; }
+  li { margin: 2px 0; }
+  .flow { display: flex; align-items: stretch; gap: 4px; margin: 10px 0; page-break-inside: avoid; }
+  .job { flex: 1; border: 1px solid #b9c4cf; border-radius: 6px; padding: 6px; font-size: 8.6pt; text-align: center; background: #fff; }
+  .job b { display: block; font-size: 9pt; margin-bottom: 3px; }
+  .arrow { align-self: center; color: #7a8692; font-size: 13pt; }
+  .gate { background: #fff7e0; border-color: #e0b84a; }
+  .small { font-size: 9pt; color: #5a6570; }
+</style>
+<style>
+  .arch { display: flex; gap: 6px; margin: 8px 0; page-break-inside: avoid; align-items: stretch; }
+  .col { flex: 1; border: 1px solid #b9c4cf; border-radius: 6px; padding: 6px; font-size: 9pt; background: #fff; }
+  .col h4 { margin: 0 0 4px; font-size: 9.5pt; color: #1a4a7a; }
+  .col .job { margin: 3px 0; padding: 4px; font-size: 9pt; }
+  .env { border: 2px solid #2b6cb0; border-radius: 8px; padding: 6px; flex: 2.2; background: #f7f9fb; }
+  .row { display: flex; gap: 4px; margin: 4px 0; align-items: stretch; }
+  .flow.wrap { flex-wrap: wrap; }
+  .fail-job { background: #fdeeee; border-color: #d98a8a; }
+  .job { font-size: 9pt; } .job b { font-size: 9.5pt; }
+  .okjob { background: #eefaf0; border-color: #8fcf9f; }
+</style>
+</head>
+<body>
+
+<h1>Proyecto final: votaciones en vivo con CI/CD</h1>
+<p class="sub">Integración y Entrega Continua de Software (SI6008), EAFIT. Equipo: Sergio Junca y Valeria Cardona Urrea. Fecha del reporte: 18 nov 2026. Presentación: sábado 21 nov, 8 am, 15 minutos más preguntas.</p>
+
+<div class="box">
+<b>Estado en una línea:</b> el código de la app, la infraestructura y los 4 workflows están escritos y las pruebas locales pasan (API 21 pruebas con 97 % de cobertura, web 11 pruebas con 100 %, <code>terraform validate</code> correcto). Todavía no corrió ningún pipeline: AWS, Docker Hub, SonarCloud, Discord y las Releases están <span class="wait">Pendiente</span> de activarse (pasos en <code>docs/pasos-para-activar.md</code>).
+</div>
+
+<h2>1. Qué pedía el proyecto</h2>
+<p>Un artefacto distinto al de clase, con al menos dos componentes, y un pipeline completo de CI/CD con al menos tres modificaciones o introducciones. Mínimo de CI: checkout, build, pruebas estáticas, unitarias con cobertura y un artefacto versionado. Mínimo de CD: infraestructura como código, despliegue de infra y app en 2 ambientes o más, pruebas pre y post producción, rollback automático ante un smoke fallido y rollback manual (botón de pánico). Vale 25 % de la nota. El profesor pidió un resumen ejecutivo con el contexto de la solución, lo construido y las particularidades de los pipelines.</p>
+
+<h3>Evolución desde los talleres</h3>
+<table>
+<tr><th style="width:15%">Entrega</th><th style="width:38%">Qué aportó</th><th>Qué reutiliza el proyecto</th></tr>
+<tr><td>Taller 1</td><td>GitHub y GitHub Actions: primer workflow</td><td>Orquestador (GitHub Actions) y flujo con PR</td></tr>
+<tr><td>Taller 2</td><td>CI: pruebas, cobertura, imagen Docker, SonarCloud</td><td>Jobs de lint, cobertura de 80 %, quality gate y publicación en Docker Hub</td></tr>
+<tr><td>Taller 3</td><td>CD: Terraform, ECS Fargate, ALB, staging y producción, aprobación manual, smoke</td><td>Los mismos nombres de jobs, el estado en S3 con workspaces y la lección del flag de Chrome 157 para Selenium</td></tr>
+<tr><td>Proyecto</td><td>App nueva de 2 componentes y DynamoDB, rollback automático, botón de pánico y 3 modificaciones</td><td>Todo lo anterior más <code>deploy.yml</code> reutilizable</td></tr>
+</table>
+
+<h2>2. La solución y su arquitectura</h2>
+<p>La app es una votación en vivo: se crea una encuesta, la pantalla muestra un QR, el público vota desde el celular y las barras se refrescan cada 2 segundos. Reglas que se prueban: un voto por votante, encuesta cerrada, opción inexistente, porcentajes que suman 100. Los votos viven en DynamoDB, así que un deploy o un rollback no los borra.</p>
+<div class="arch">
+  <div class="col"><h4>Fuera de AWS</h4>
+    <div class="job"><b>Celulares y navegador</b>escanean el QR y votan</div>
+    <div class="job"><b>GitHub Actions</b>CI/CD y botón de pánico</div>
+    <div class="job"><b>Docker Hub</b>votaciones-api y votaciones-web, etiquetas 1.0.N y SHA</div>
+    <div class="job"><b>SonarCloud</b>quality gate</div>
+    <div class="job"><b>Discord</b>avisos</div>
+  </div>
+  <div class="arrow" style="align-self:center">&rarr;</div>
+  <div class="env"><h4>Un ambiente (staging o production), us-east-1</h4>
+    <div class="row"><div class="job"><b>ALB, HTTP 80</b>regla <code>/api/*</code> hacia la API, el resto hacia la web</div></div>
+    <div class="row">
+      <div class="job"><b>Servicio api</b>Flask y gunicorn, puerto 8000, Fargate 256 CPU y 512 MB. Health check <code>/api/health</code></div>
+      <div class="job"><b>Servicio web</b>nginx con el build de React, puerto 80, Fargate 256 CPU y 512 MB. Health check <code>/</code></div>
+    </div>
+    <div class="row">
+      <div class="job"><b>DynamoDB</b><code>votaciones-&lt;ambiente&gt;</code>, bajo demanda</div>
+      <div class="job"><b>CloudWatch Logs</b>un grupo por servicio</div>
+      <div class="job"><b>LabRole</b>rol de las tareas (creado a mano)</div>
+    </div>
+  </div>
+  <div class="arrow" style="align-self:center">&larr;</div>
+  <div class="col"><h4>Estado de Terraform</h4>
+    <div class="job"><b>S3</b><code>tfstate-votaciones-sjunka</code>, workspaces staging y production</div>
+  </div>
+</div>
+<p>La web llama a la API con rutas relativas por el mismo ALB: no hay CORS y la misma imagen web sirve en los dos ambientes. Cada ECS tiene el circuit breaker con rollback: si la tarea nueva no queda sana, vuelve a la anterior.</p>
+
+<h2>3. Paso a paso: lo que pedía el enunciado y lo que hicimos</h2>
+<table>
+<tr><th style="width:17%">Mínimo</th><th>Qué hicimos</th><th style="width:15%">Estado</th></tr>
+<tr><td>Checkout y build</td><td><code>build-and-test</code>: checkout con historial, <code>docker build</code> de las 2 imágenes.</td><td><span class="wait">Pendiente</span> primer run</td></tr>
+<tr><td>Pruebas estáticas</td><td>Black, Flake8, Pylint, ESLint y SonarCloud. Local: Black y ESLint sin errores, Flake8 sin hallazgos, Pylint 10/10.</td><td><span class="ok">Local</span> <span class="wait">Sonar pendiente</span></td></tr>
+<tr><td>Unitarias y cobertura</td><td>pytest con moto (API) y Vitest (web), umbral de 80 %.</td><td><span class="ok">Local</span></td></tr>
+<tr><td>Release: artefacto</td><td>Imágenes <code>votaciones-api</code> y <code>votaciones-web</code> con <code>1.0.N</code> y SHA, y Release <code>v1.0.N</code>.</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>IaC</td><td><code>infra/</code> con Terraform 1.17.1: ALB, 2 servicios ECS, DynamoDB, logs. <code>fmt</code> y <code>validate</code> corren en CI.</td><td><span class="ok">Validado</span></td></tr>
+<tr><td>Deploy infra y app, 2 ambientes</td><td><code>deploy.yml</code> con workspace <code>staging</code> y <code>production</code>; espera la versión en <code>/api/health</code>.</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>Pruebas pre-prod</td><td>Integración de la API y E2E con Selenium contra staging (<code>test-staging</code>).</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>Pruebas post-prod</td><td>Smoke de solo lectura contra producción (<code>smoke-test-production</code>).</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>Rollback automático</td><td>Si falla el deploy o el smoke de producción: última Release, mismo <code>deploy.yml</code>, smoke y aviso.</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>Rollback manual</td><td><code>panic-rollback.yml</code>, "Rollback de emergencia", con ambiente y versión opcional.</td><td><span class="wait">Pendiente</span></td></tr>
+</table>
+
+<h2>4. El pipeline</h2>
+<p><b>Flujo de <code>ci-cd.yml</code></b> (nombre <code>CI/CD Pipeline</code>). Se construye una vez y se promueve la misma imagen a los dos ambientes.</p>
+<div class="flow">
+  <div class="job"><b>build-and-test</b>lint, gitleaks, terraform validate, pruebas 80 %, Sonar, build, Trivy, push</div><div class="arrow">&rarr;</div>
+  <div class="job"><b>deploy-staging</b>terraform apply, espera /api/health</div><div class="arrow">&rarr;</div>
+  <div class="job"><b>test-staging</b>integración y Selenium</div><div class="arrow">&rarr;</div>
+  <div class="job gate"><b>Aprobación</b>ambiente production, Sergio o Valeria</div><div class="arrow">&rarr;</div>
+  <div class="job"><b>deploy-production</b>terraform apply</div><div class="arrow">&rarr;</div>
+  <div class="job"><b>smoke-test-production</b>solo lectura</div>
+</div>
+<div class="flow">
+  <div class="job okjob"><b>Si el smoke pasa: publish-release</b>Release v1.0.N con notas automáticas y aviso a Discord</div>
+  <div class="job fail-job"><b>Si falla el deploy o el smoke: rollback</b>find-rollback-release, rollback-production (ambiente production-rollback, sin revisores), smoke-test-rollback y notify-rollback. El run termina en rojo a propósito</div>
+  <div class="job"><b>Botón de pánico: panic-rollback.yml</b>a mano, ambiente y versión opcional; mismo deploy, smoke y aviso con el usuario que lo lanzó</div>
+</div>
+
+<h3>Particularidades</h3>
+<table>
+<tr><th style="width:24%">Particularidad</th><th>Detalle</th></tr>
+<tr><td>Eventos</td><td>PR a <code>main</code>: solo <code>build-and-test</code>. Push a <code>main</code>: todo el flujo, salvo cambios que solo tocan <code>**.md</code>, <code>docs/**</code>, <code>sustentacion/**</code> o <code>pages.yml</code> (<code>paths-ignore</code>). <code>workflow_dispatch</code> para correrlo a mano.</td></tr>
+<tr><td>Un solo deploy</td><td><code>deploy.yml</code> (<code>workflow_call</code>) lo usan staging, producción, el rollback automático y el botón de pánico. El camino para volver es el mismo que se probó para ir.</td></tr>
+<tr><td>Versión</td><td><code>VERSION</code> trae <code>1.0</code>; el PATCH es <code>github.run_number</code>. Etiquetas <code>1.0.N</code> y SHA completo.</td></tr>
+<tr><td>Rollback sin aprobación</td><td>El regreso usa el ambiente <code>production-rollback</code>, sin revisores. Si usara <code>production</code>, esperaría a una persona.</td></tr>
+<tr><td>Releases como puntos de restauración</td><td>La Release se crea solo después del smoke de producción. Por eso, si una versión falla, la última Release es la última versión buena.</td></tr>
+<tr><td>Concurrencia</td><td><code>concurrency</code> sin cancelar: un <code>terraform apply</code> nunca se corta a la mitad.</td></tr>
+<tr><td>Calidad que no bloquea</td><td>Flake8 y Pylint corren con <code>--exit-zero</code> y sus reportes los lee SonarCloud. Black, ESLint, gitleaks, Trivy (CVE críticos con corrección), cobertura y quality gate sí bloquean.</td></tr>
+</table>
+
+<div style="page-break-inside:avoid"><h3>Las 3 modificaciones</h3>
+<table>
+<tr><th style="width:5%">#</th><th style="width:27%">Modificación</th><th>Qué cambia frente al Taller 3</th></tr>
+<tr><td>1</td><td>DevSecOps: gitleaks y Trivy</td><td>El CI busca secretos en el código y el historial y escanea las 2 imágenes antes de publicarlas.</td></tr>
+<tr><td>2</td><td>SemVer 1.0.N y Releases</td><td>Cada versión que pasa producción queda como Release <code>v1.0.N</code>; el rollback vuelve a esas Releases.</td></tr>
+<tr><td>3</td><td>Avisos a Discord</td><td>Mensaje al desplegar, al fallar y al hacer rollback, con el enlace al run. Si no hay webhook, el paso no falla.</td></tr>
+</table></div>
+<p class="small">El rollback automático y el botón de pánico son mínimos del enunciado, no modificaciones. La prueba de carga con k6 queda como reserva y no está implementada.</p>
+
+<h3>Pruebas</h3>
+<table>
+<tr><th style="width:21%">Prueba</th><th style="width:14%">Dónde</th><th style="width:22%">Herramienta</th><th>Qué valida</th></tr>
+<tr><td>Formato y lint</td><td>CI</td><td>Black, Flake8, Pylint, ESLint</td><td>Estilo y errores comunes</td></tr>
+<tr><td>Secretos</td><td>CI</td><td>gitleaks</td><td>Que no haya llaves en código ni historial</td></tr>
+<tr><td>IaC</td><td>CI</td><td>terraform fmt y validate</td><td>Infraestructura bien escrita, sin AWS</td></tr>
+<tr><td>Unitarias, 80 %</td><td>CI</td><td>pytest con moto, Vitest</td><td>Reglas de la encuesta, sin AWS</td></tr>
+<tr><td>Calidad</td><td>CI</td><td>SonarCloud</td><td>Bugs, vulnerabilidades, duplicación</td></tr>
+<tr><td>Imagen</td><td>CI</td><td>Trivy</td><td>CVE críticos en las 2 imágenes</td></tr>
+<tr><td>Integración</td><td>Staging</td><td>pytest y requests</td><td>API real con DynamoDB real, errores 400, 404 y 409</td></tr>
+<tr><td>E2E</td><td>Staging</td><td>Selenium</td><td>Crear, votar y ver el resultado</td></tr>
+<tr><td>Smoke</td><td>Producción</td><td>pytest y requests</td><td>Web carga, health <code>ok</code>, versión esperada, solo lectura</td></tr>
+<tr><td>Smoke tras rollback</td><td>Producción</td><td>las mismas</td><td>La versión restaurada responde</td></tr>
+<tr><td>Health check</td><td>Ambos</td><td>ALB y circuit breaker de ECS</td><td>Si la tarea no queda sana, ECS vuelve a la anterior</td></tr>
+</table>
+
+<h2>5. Resultados verificados</h2>
+<p>Corridos en la máquina de Sergio el 18 nov 2026 sobre el código del repo. No son resultados de GitHub Actions.</p>
+<table>
+<tr><th style="width:30%">Qué</th><th>Resultado</th></tr>
+<tr><td>API: pytest con moto</td><td><span class="ok">Pasó</span> 21 pruebas, cobertura 97,32 % (mínimo 80 %).</td></tr>
+<tr><td>API: Black, Flake8, Pylint</td><td><span class="ok">Pasó</span> Black sin cambios, Flake8 sin hallazgos, Pylint 10,00/10.</td></tr>
+<tr><td>Web: Vitest y ESLint</td><td><span class="ok">Pasó</span> 11 pruebas, 100 % en líneas, ramas, funciones y sentencias sobre <code>src/lib</code>. ESLint sin errores.</td></tr>
+<tr><td>Terraform</td><td><span class="ok">Pasó</span> <code>fmt -check</code> y <code>validate</code> correctos con <code>init -backend=false</code>.</td></tr>
+<tr><td>Staging y producción en AWS</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>Run exitoso, run con rollback, botón de pánico</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>SonarCloud (quality gate y cobertura)</td><td><span class="wait">Pendiente</span> El primer análisis dará Quality Gate NONE; se relanza con <code>gh run rerun --failed</code>.</td></tr>
+<tr><td>Releases, imágenes en Docker Hub, mensajes de Discord</td><td><span class="wait">Pendiente</span></td></tr>
+</table>
+<p class="small">No corrimos el E2E, la integración ni el smoke contra el stack local (<code>docker compose up</code>) para este reporte. Tampoco se corrió ninguno de los workflows.</p>
+
+<h2>6. Decisiones que se apartan de la guía o del plan</h2>
+<table>
+<tr><th style="width:32%">Decisión</th><th>Por qué</th></tr>
+<tr><td>Equipo de 2, no de 3</td><td>Autorizado por el profesor. Los roles se reparten entre Sergio y Valeria.</td></tr>
+<tr><td>AWS personal de Sergio, no Learner Lab</td><td>Cuesta dinero real mientras los dos ambientes estén encendidos. Usa llaves permanentes de un usuario IAM de CI (sin <code>AWS_SESSION_TOKEN</code>) y hay que destruir todo al terminar.</td></tr>
+<tr><td><code>LabRole</code> creado a mano</td><td>El Learner Lab lo trae. Se crea igual para que <code>infra/main.tf</code> lo lea con un data source, con <code>AmazonECSTaskExecutionRolePolicy</code> y acceso a DynamoDB.</td></tr>
+<tr><td>Rollback con ambiente propio</td><td>El ambiente <code>production-rollback</code> no tiene revisores, para no esperar aprobación al volver.</td></tr>
+<tr><td>Rollback de la imagen, no de la infra</td><td>Un cambio malo de Terraform se corrige con <code>git revert</code> y el pipeline normal.</td></tr>
+<tr><td>HTTP sin TLS</td><td>Como en el Taller 3. Selenium usa <code>--disable-features=HttpsFirstBalancedModeAutoEnable</code> porque Chrome 157 deja en blanco los sitios solo HTTP.</td></tr>
+<tr><td>Llaves en GitHub Secrets, no OIDC</td><td>Es lo que ya funcionó en el Taller 3 y es lo más corto de montar. OIDC sería lo ideal.</td></tr>
+</table>
+<div class="box warn"><b>Ojo:</b> el rollback exige una Release previa. Antes de exponer hay que tener al menos 2 Releases (dos runs verdes).</div>
+
+<h2>7. Qué sigue</h2>
+<ol>
+<li>Sergio crea el repo remoto y la cuenta AWS (bucket de estado, <code>LabRole</code>, usuario de CI), Docker Hub, SonarCloud y el webhook de Discord. Pasos exactos en <code>docs/pasos-para-activar.md</code>.</li>
+<li>Crear los ambientes <code>staging</code>, <code>production</code> y <code>production-rollback</code> y el ruleset <code>proteger-main</code>. Invitar a Valeria.</li>
+<li>Primer run, aprobación de producción y al menos 2 Releases.</li>
+<li>Probar el rollback automático con una versión rota a propósito y el botón de pánico.</li>
+<li>Capturas y datos en <code>sustentacion/src/data/pendientes.ts</code>; regenerar este PDF con los enlaces reales.</li>
+<li>Presentar el sábado 21 y, después, destruir todo y revocar los tokens.</li>
+</ol>
+
+<h2>8. Los 10 puntos del enunciado</h2>
+<table>
+<tr><th style="width:4%">#</th><th style="width:36%">Punto</th><th style="width:22%">Vista de la app de sustentación</th><th>Dónde en este reporte</th></tr>
+<tr><td>1</td><td>Explicación del artefacto</td><td>Artefacto</td><td>Secciones 1 y 2</td></tr>
+<tr><td>2</td><td>Estrategia de versionamiento y ramas</td><td>Ramas</td><td>Sección 4, particularidades (versión) y modificación 2</td></tr>
+<tr><td>3</td><td>Diseño y componentes del pipeline</td><td>Pipeline</td><td>Sección 4, flujo</td></tr>
+<tr><td>4</td><td>Versionamiento integrado al pipeline</td><td>Ramas</td><td>Sección 4, eventos y versión</td></tr>
+<tr><td>5</td><td>Diagrama de arquitectura</td><td>Arquitectura</td><td>Sección 2</td></tr>
+<tr><td>6</td><td>Pruebas implementadas</td><td>Pruebas</td><td>Sección 4, tabla de pruebas</td></tr>
+<tr><td>7</td><td>Pipelines ejecutados con éxito</td><td>Evidencia</td><td>Sección 5 (pendiente en vivo)</td></tr>
+<tr><td>8</td><td>Tres modificaciones</td><td>Modificaciones</td><td>Sección 4, las 3 modificaciones</td></tr>
+<tr><td>9</td><td>App funcionando en cada ambiente</td><td>Evidencia</td><td>Sección 9, URLs (pendiente)</td></tr>
+<tr><td>10</td><td>Desafíos y aprendizajes</td><td>Aprendizajes</td><td>Secciones 6 y 7</td></tr>
+</table>
+<p class="small">Además, la vista Rollback de la app cubre el mínimo de rollback automático y manual.</p>
+
+<h2>9. Por qué importa cada parte</h2>
+<ul>
+<li><b>Staging antes de producción:</b> en el Taller 3 el fallo de Selenium apareció en staging y producción no se tocó. Aquí pasa lo mismo con el E2E.</li>
+<li><b>Una imagen por versión:</b> lo que se prueba en staging es lo que llega a producción, sin reconstruir.</li>
+<li><b>Releases:</b> son la lista de versiones buenas. Sin una Release previa el rollback no sabe a dónde volver.</li>
+<li><b>DynamoDB fuera del contenedor:</b> los votos sobreviven a un deploy o a un rollback, y el esquema no cambia entre versiones.</li>
+<li><b>Aprobación manual:</b> convierte el despliegue continuo en entrega continua; el equipo decide el momento en la demo.</li>
+<li><b>gitleaks y Trivy:</b> una llave filtrada o un CVE crítico detiene el pipeline antes de publicar la imagen.</li>
+</ul>
+
+<div style="page-break-inside:avoid"><h2>10. Enlaces</h2>
+<table>
+<tr><td style="width:24%">Repositorio</td><td><code>https://github.com/sjunka/votaciones-cicd</code> <span class="wait">Pendiente</span> crearlo y subir</td></tr>
+<tr><td>Sustentación</td><td><code>https://sjunka.github.io/votaciones-cicd/</code> <span class="wait">Pendiente</span> activar Pages</td></tr>
+<tr><td>Actions y Releases</td><td><code>https://github.com/sjunka/votaciones-cicd/actions</code> y <code>/releases</code> <span class="wait">Pendiente</span></td></tr>
+<tr><td>Run exitoso y run con rollback</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>Staging y producción</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>SonarCloud y Docker Hub</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>Enunciado</td><td><code>material-md/Proyecto final - enunciado.md</code> del repo del curso</td></tr>
+</table></div>
+
+</body>
+</html>

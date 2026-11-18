@@ -1,0 +1,116 @@
+# .github/workflows/deploy.yml
+# Workflow reutilizable: despliega una versión (1.0.N) en un ambiente con Terraform.
+# Lo llaman ci-cd.yml (staging, producción y rollback) y panic-rollback.yml.
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      tf_workspace:
+        description: Workspace de Terraform (staging o production)
+        type: string
+        required: true
+      gh_environment:
+        description: Ambiente de GitHub (staging, production o production-rollback)
+        type: string
+        required: true
+      version:
+        description: Versión de las imágenes, por ejemplo 1.0.7
+        type: string
+        required: true
+      commit:
+        description: SHA del commit de esa versión
+        type: string
+        required: true
+    outputs:
+      alb_url:
+        description: URL pública del ALB del ambiente
+        value: ${{ jobs.deploy.outputs.alb_url }}
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  TF_VERSION: '1.17.1'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.gh_environment }}
+      url: ${{ steps.tf_outputs.outputs.alb_url }}
+    outputs:
+      alb_url: ${{ steps.tf_outputs.outputs.alb_url }}
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false  # Permite leer "terraform output" sin texto extra
+
+      - name: Terraform Init
+        run: |
+          terraform init -input=false -backend-config=backend.hcl
+          terraform workspace select -or-create "${{ inputs.tf_workspace }}"
+
+      - name: Terraform Apply
+        env:
+          TF_VAR_environment_name: ${{ inputs.tf_workspace }}
+          TF_VAR_api_image_uri: ${{ vars.DOCKERHUB_USERNAME }}/votaciones-api:${{ inputs.version }}
+          TF_VAR_web_image_uri: ${{ vars.DOCKERHUB_USERNAME }}/votaciones-web:${{ inputs.version }}
+          TF_VAR_app_version: ${{ inputs.version }}
+          TF_VAR_app_commit: ${{ inputs.commit }}
+        run: terraform apply -auto-approve -input=false
+
+      - name: Get Terraform Outputs
+        id: tf_outputs
+        run: echo "alb_url=$(terraform output -raw alb_url)" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for the version in /api/health
+        env:
+          ALB_URL: ${{ steps.tf_outputs.outputs.alb_url }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          echo "Esperando la versión $VERSION en $ALB_URL"
+          # Reintenta durante máximo 5 minutos (30 intentos x 10 segundos)
+          for i in $(seq 1 30); do
+            actual=$(curl -sf "$ALB_URL/api/health" | jq -r .version || true)
+            if [ "$actual" = "$VERSION" ]; then
+              echo "Versión correcta desplegada"
+              exit 0
+            fi
+            echo "Intento $i: responde '${actual:-nada}', esperando 10s..."
+            sleep 10
+          done
+          echo "La versión $VERSION no quedó desplegada a tiempo"
+          exit 1
+
+      - name: Job summary
+        if: always()
+        env:
+          ALB_URL: ${{ steps.tf_outputs.outputs.alb_url }}
+        run: |
+          {
+            echo "### Despliegue en ${{ inputs.tf_workspace }}"
+            echo ""
+            echo "- Resultado: ${{ job.status }}"
+            echo "- Versión: ${{ inputs.version }}"
+            echo "- Commit: ${{ inputs.commit }}"
+            echo "- Ambiente de GitHub: ${{ inputs.gh_environment }}"
+            echo "- URL: ${ALB_URL:-pendiente}"
+          } >> "$GITHUB_STEP_SUMMARY"

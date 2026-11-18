@@ -1,0 +1,132 @@
+# .github/workflows/panic-rollback.yml
+name: Rollback de emergencia
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Ambiente a restaurar
+        type: choice
+        options:
+          - production
+          - staging
+        default: production
+      version:
+        description: Versión a restaurar (ej. 1.0.7). Vacía = la Release anterior a la que responde hoy
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+# Un solo despliegue a la vez por ambiente
+concurrency:
+  group: panic-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  resolve-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      commit: ${{ steps.release.outputs.commit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configure AWS Credentials
+        if: inputs.version == ''
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve version to restore
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$VERSION" ]; then
+            scripts/resolver-release.sh exact "$VERSION" | tee -a "$GITHUB_OUTPUT"
+          else
+            # Sin versión: se lee la que responde hoy el ambiente
+            dns=$(aws elbv2 describe-load-balancers --names "votaciones-$ENVIRONMENT-alb" \
+              --query 'LoadBalancers[0].DNSName' --output text)
+            actual=$(curl -sf "http://$dns/api/health" | jq -r .version)
+            echo "Hoy responde la versión $actual"
+            scripts/resolver-release.sh before "$actual" | tee -a "$GITHUB_OUTPUT"
+          fi
+
+  rollback:
+    needs: resolve-version
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      tf_workspace: ${{ inputs.environment }}
+      # En producción se usa el ambiente sin revisores para no esperar aprobación
+      gh_environment: ${{ inputs.environment == 'production' && 'production-rollback' || 'staging' }}
+      version: ${{ needs.resolve-version.outputs.version }}
+      commit: ${{ needs.resolve-version.outputs.commit }}
+
+  smoke-test:
+    needs: [resolve-version, rollback]
+    runs-on: ubuntu-latest
+    env:
+      APP_BASE_URL: ${{ needs.rollback.outputs.alb_url }}
+      EXPECTED_VERSION: ${{ needs.resolve-version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tests/requirements.txt
+
+      - name: Run Smoke Tests after rollback
+        run: pytest tests/smoke --html=smoke-report.html --self-contained-html
+
+      - name: Upload Smoke Report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-report-panic
+          path: smoke-report.html
+
+  notify:
+    needs: [resolve-version, rollback, smoke-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RESULT: ${{ needs.smoke-test.result == 'success' && 'restaurado y verificado' || 'FALLÓ, revisar el run' }}
+        run: |
+          scripts/notify-discord.sh "Rollback de emergencia en ${{ inputs.environment }} lanzado por ${{ github.actor }}: versión ${{ needs.resolve-version.outputs.version || 'sin resolver' }}, $RESULT. ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Job summary
+        run: |
+          {
+            echo "### Rollback de emergencia en ${{ inputs.environment }}"
+            echo ""
+            echo "- Lanzado por: ${{ github.actor }}"
+            echo "- Versión restaurada: ${{ needs.resolve-version.outputs.version || 'sin resolver' }}"
+            echo "- Despliegue: ${{ needs.rollback.result }}"
+            echo "- Smoke: ${{ needs.smoke-test.result }}"
+            echo "- URL: ${{ needs.rollback.outputs.alb_url || 'pendiente' }}"
+          } >> "$GITHUB_STEP_SUMMARY"

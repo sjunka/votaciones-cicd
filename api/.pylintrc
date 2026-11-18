@@ -1,0 +1,4 @@
+[MASTER]
+ignore=.venv
+[MESSAGES CONTROL]
+disable=too-many-return-statements,missing-module-docstring,missing-function-docstring,missing-class-docstring

@@ -1,0 +1,403 @@
+# .github/workflows/ci-cd.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:  # Cambios solo de documentación o de la sustentación no vuelven a desplegar
+      - '**.md'
+      - 'docs/**'
+      - 'sustentacion/**'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Evita que dos ejecuciones desplieguen al mismo tiempo. Una ejecución nueva espera
+# a que termine la anterior (nunca se cancela un terraform apply a mitad de camino).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: '1.17.1'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. CI: pruebas, análisis, seguridad, validación de Terraform e imágenes
+  # ---------------------------------------------------------------------------
+  build-and-test:  # No cambies este nombre: la regla de protección de main lo usa
+    runs-on: ubuntu-latest
+    env:
+      API_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/votaciones-api
+      WEB_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/votaciones-web
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      api_image: ${{ steps.version.outputs.api_image }}
+      web_image: ${{ steps.version.outputs.web_image }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # gitleaks revisa el historial
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Set up Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r api/requirements-dev.txt
+          npm ci --prefix web
+
+      - name: Run Black (Formatter)
+        working-directory: api
+        run: black --check .
+
+      - name: Run Flake8 (Linter)
+        working-directory: api
+        run: flake8 app --exit-zero --output-file=flake8-report.txt
+
+      - name: Run Pylint (Linter)
+        working-directory: api
+        run: pylint app --exit-zero --output-format=text > pylint-report.txt
+
+      - name: Run ESLint (Linter)
+        working-directory: web
+        run: npm run lint
+
+      # Modificación 1 (DevSecOps): que no haya llaves en el código ni en el historial
+      - name: Run gitleaks (Secrets)
+        uses: gitleaks/gitleaks-action@v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format and Validate
+        working-directory: infra
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false
+          terraform validate
+
+      - name: Run API Unit Tests (coverage 80%)
+        working-directory: api
+        run: pytest  # api/pytest.ini define --cov-fail-under=80 y genera coverage.xml
+
+      - name: Run Web Unit Tests (coverage 80%)
+        working-directory: web
+        run: npm test  # vitest run --coverage, genera coverage/lcov.info
+
+      - name: Upload Test Reports Artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: |
+            api/coverage.xml
+            api/pylint-report.txt
+            api/flake8-report.txt
+            web/coverage/
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+      # Modificación 2: versión 1.0.N (MAJOR.MINOR del archivo VERSION, N = número de ejecución)
+      - name: Compute version
+        id: version
+        run: |
+          version="$(tr -d '[:space:]' < VERSION).${{ github.run_number }}"
+          {
+            echo "version=$version"
+            echo "api_image=$API_IMAGE:$version"
+            echo "web_image=$WEB_IMAGE:$version"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker images
+        run: |
+          docker build -t "$API_IMAGE:${{ steps.version.outputs.version }}" -t "$API_IMAGE:${{ github.sha }}" api
+          docker build -t "$WEB_IMAGE:${{ steps.version.outputs.version }}" -t "$WEB_IMAGE:${{ github.sha }}" web
+
+      # Modificación 1 (DevSecOps): falla si una imagen trae CVE críticos con corrección disponible
+      - name: Trivy scan (API image)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.version.outputs.api_image }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          output: trivy-api.txt
+
+      - name: Trivy scan (Web image)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.version.outputs.web_image }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          output: trivy-web.txt
+
+      - name: Upload Trivy Reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: trivy-reports
+          path: trivy-*.txt
+          if-no-files-found: ignore
+
+      # --- Publicación: solo cuando el cambio ya está integrado en main ---
+
+      - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker images
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker push --all-tags "$API_IMAGE"
+          docker push --all-tags "$WEB_IMAGE"
+
+  # ---------------------------------------------------------------------------
+  # 2. Despliegue en Staging (la misma imagen que se construyó arriba)
+  # ---------------------------------------------------------------------------
+  deploy-staging:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      tf_workspace: staging
+      gh_environment: staging
+      version: ${{ needs.build-and-test.outputs.version }}
+      commit: ${{ github.sha }}
+
+  # ---------------------------------------------------------------------------
+  # 3. Pruebas contra Staging (pre-producción): integración y E2E
+  # ---------------------------------------------------------------------------
+  test-staging:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    env:
+      APP_BASE_URL: ${{ needs.deploy-staging.outputs.alb_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tests/requirements.txt
+
+      - name: Run Integration Tests against Staging
+        run: pytest tests/integration --html=integration-report.html --self-contained-html
+
+      - name: Run E2E Tests against Staging
+        run: pytest tests/e2e --html=e2e-report.html --self-contained-html
+
+      - name: Upload Staging Reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: staging-reports
+          path: |
+            integration-report.html
+            e2e-report.html
+
+  # ---------------------------------------------------------------------------
+  # 4. Despliegue en Producción (con aprobación manual del ambiente "production")
+  # ---------------------------------------------------------------------------
+  deploy-production:
+    needs: [build-and-test, test-staging]
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      tf_workspace: production
+      gh_environment: production
+      version: ${{ needs.build-and-test.outputs.version }}
+      commit: ${{ github.sha }}
+
+  # ---------------------------------------------------------------------------
+  # 5. Pruebas de humo contra Producción (solo lectura)
+  # ---------------------------------------------------------------------------
+  smoke-test-production:
+    needs: [build-and-test, deploy-production]
+    runs-on: ubuntu-latest
+    env:
+      APP_BASE_URL: ${{ needs.deploy-production.outputs.alb_url }}
+      EXPECTED_VERSION: ${{ needs.build-and-test.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tests/requirements.txt
+
+      - name: Run Smoke Tests against Production
+        run: pytest tests/smoke --html=smoke-report.html --self-contained-html
+
+      - name: Upload Smoke Report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-report
+          path: smoke-report.html
+
+  # ---------------------------------------------------------------------------
+  # 6. Release v1.0.N (punto de restauración) y aviso a Discord
+  # ---------------------------------------------------------------------------
+  publish-release:
+    needs: [build-and-test, deploy-production, smoke-test-production]
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Solo este job crea la Release y su tag
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build-and-test.outputs.version }}
+        run: gh release create "v$VERSION" --target "$GITHUB_SHA" --title "v$VERSION" --generate-notes
+
+      - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          VERSION: ${{ needs.build-and-test.outputs.version }}
+        run: |
+          scripts/notify-discord.sh "Desplegada la versión $VERSION en producción: ${{ needs.deploy-production.outputs.alb_url }} . Release: ${{ github.server_url }}/${{ github.repository }}/releases/tag/v$VERSION"
+
+  # ---------------------------------------------------------------------------
+  # 7. Rollback automático si falla el despliegue o las smoke de producción
+  #    (no corre si falló algo anterior: producción todavía no cambió).
+  #    El run termina en rojo a propósito.
+  # ---------------------------------------------------------------------------
+  find-rollback-release:
+    needs: [deploy-production, smoke-test-production]
+    if: always() && (needs.deploy-production.result == 'failure' || needs.smoke-test-production.result == 'failure')
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      commit: ${{ steps.release.outputs.commit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Esta ejecución todavía no creó su Release: la última es la versión buena anterior
+      - name: Find the last Release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/resolver-release.sh latest | tee -a "$GITHUB_OUTPUT"
+
+  rollback-production:
+    needs: find-rollback-release
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      tf_workspace: production
+      gh_environment: production-rollback  # Sin revisores: no espera aprobación
+      version: ${{ needs.find-rollback-release.outputs.version }}
+      commit: ${{ needs.find-rollback-release.outputs.commit }}
+
+  smoke-test-rollback:
+    needs: [find-rollback-release, rollback-production]
+    runs-on: ubuntu-latest
+    env:
+      APP_BASE_URL: ${{ needs.rollback-production.outputs.alb_url }}
+      EXPECTED_VERSION: ${{ needs.find-rollback-release.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tests/requirements.txt
+
+      - name: Run Smoke Tests after rollback
+        run: pytest tests/smoke --html=smoke-rollback-report.html --self-contained-html
+
+      - name: Upload Smoke Report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-rollback-report
+          path: smoke-rollback-report.html
+
+  # ---------------------------------------------------------------------------
+  # Avisos a Discord por fallas (modificación 3)
+  # ---------------------------------------------------------------------------
+  notify-rollback:
+    needs: [find-rollback-release, rollback-production, smoke-test-rollback]
+    if: always() && needs.find-rollback-release.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RESULT: ${{ needs.smoke-test-rollback.result == 'success' && 'restaurada y verificada' || 'el rollback también falló, intervenir a mano' }}
+        run: |
+          scripts/notify-discord.sh "Falló el despliegue en producción. Versión ${{ needs.find-rollback-release.outputs.version || 'sin resolver' }}: $RESULT. ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+  notify-failure:
+    needs: [build-and-test, deploy-staging, test-staging]
+    if: always() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          scripts/notify-discord.sh "Falló el pipeline antes de producción (producción sigue igual). ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
