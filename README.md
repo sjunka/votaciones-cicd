@@ -2,7 +2,7 @@
 
 Votación en vivo con QR. Alguien crea una encuesta, la pantalla muestra un código QR, el público lo escanea con el celular, vota y las barras de resultado se mueven cada 2 segundos. Es el proyecto final del curso Integración y Entrega Continua de Software (SI6008, EAFIT) y reutiliza el pipeline de los talleres 1 a 3.
 
-Autor: Sergio Junca.
+Autor: Sergio Junca. Estado al 2026-11-18: el pipeline corrió completo en AWS (staging y producción en la versión 1.0.8), con rollback automático y botón de pánico probados. Falta Discord (`pendiente`).
 
 ## Integrantes
 
@@ -66,14 +66,14 @@ Pruebas por componente:
 
 | Componente | Comando | Qué corre |
 |---|---|---|
-| API | `cd api && pip install -r requirements-dev.txt && pytest` | pytest con moto, cobertura mínima de 80 % |
+| API | `cd api && pip install -r requirements-dev.txt && pytest` | pytest con moto (21 pruebas, 97,32 %), cobertura mínima de 80 % |
 | API (estilo) | `cd api && black --check . && flake8 && pylint app` | formato y lint |
-| Web | `cd web && npm ci && npm run lint && npm test` | ESLint y Vitest con cobertura mínima de 80 % |
+| Web | `cd web && npm ci && npm run lint && npm test` | ESLint y Vitest (12 pruebas, 100 %) con cobertura mínima de 80 % |
 | Integración | `APP_BASE_URL=http://localhost:8080 pytest tests/integration` | la API real detrás del gateway |
 | E2E | `APP_BASE_URL=http://localhost:8080 pytest tests/e2e` | Selenium con Chrome sin ventana |
 | Smoke | `APP_BASE_URL=http://localhost:8080 EXPECTED_VERSION=dev pytest tests/smoke` | solo lectura |
 
-Las pruebas de `tests/` necesitan `pip install -r tests/requirements.txt`.
+Las pruebas de `tests/` (11: integración, E2E y smoke) necesitan `pip install -r tests/requirements.txt`. Pasan contra `docker compose` y contra staging dentro del pipeline.
 
 ## Pipeline
 
@@ -100,7 +100,7 @@ Las tres modificaciones respecto al Taller 3:
 
 ## Estrategia de ramas
 
-Trunk-based. `main` es la única rama larga y está protegida por el ruleset `proteger-main`: PR obligatorio, 1 aprobación y el check `build-and-test` en verde. Los cambios van en ramas cortas `feature/*`.
+Trunk-based. `main` es la única rama larga y está protegida por el ruleset `proteger-main` (activo): PR obligatorio, 1 aprobación, check `build-and-test` en verde, sin borrar ni force push. El rol admin puede saltarlo (ver `docs/pipeline.md`). Los cambios van en ramas cortas.
 
 - Pull request a `main`: corre solo `build-and-test`. No publica ni despliega.
 - Push a `main`: pipeline completo. Se ignoran los cambios que solo tocan `**.md`, `docs/**` o `sustentacion/**`.
@@ -120,24 +120,43 @@ Se crean en GitHub, Settings, Secrets and variables, Actions. Los valores no van
 | `DOCKERHUB_USERNAME` | variable | nombre de usuario de Docker Hub |
 | `SONAR_HOST_URL` | variable | `https://sonarcloud.io` |
 
-Ambientes de GitHub: `staging`, `production` (revisores: Sergio y Valeria) y `production-rollback` (sin revisores). Los pasos completos están en `docs/pasos-para-activar.md`.
+Estado al 2026-11-18: están cargados `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN`, `DOCKERHUB_USERNAME` y `SONAR_HOST_URL`. Falta `DISCORD_WEBHOOK_URL` (`pendiente`: Discord pide iniciar sesión para crear el webhook).
+
+Ambientes de GitHub: `staging`, `production` (revisor `sjunka`; `valri2104` está invitada como colaboradora y la invitación sigue pendiente, cuando acepte se agrega como segunda revisora) y `production-rollback` (sin revisores). Los pasos completos están en `docs/pasos-para-activar.md`.
 
 ## Enlaces
 
 | Qué | Dónde |
 |---|---|
-| Repositorio | https://github.com/sjunka/votaciones-cicd (pendiente: crearlo y subir) |
-| Sustentación | https://sjunka.github.io/votaciones-cicd/ (pendiente: activar Pages) |
-| Releases | https://github.com/sjunka/votaciones-cicd/releases (pendiente) |
-| Actions | https://github.com/sjunka/votaciones-cicd/actions (pendiente) |
-| Staging | pendiente |
-| Producción | pendiente |
-| SonarCloud | pendiente |
-| Docker Hub | pendiente |
+| Repositorio | https://github.com/sjunka/votaciones-cicd |
+| Sustentación | https://sjunka.github.io/votaciones-cicd/ |
+| Releases | https://github.com/sjunka/votaciones-cicd/releases (v1.0.3 y v1.0.8 al 2026-11-18) |
+| Actions | https://github.com/sjunka/votaciones-cicd/actions |
+| Staging | http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com |
+| Producción | http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com |
+| SonarCloud | proyecto `sjunka_votaciones-cicd`, quality gate Passed |
+| Docker Hub | `sjunka/votaciones-api` y `sjunka/votaciones-web` |
+
+Runs de referencia (`https://github.com/sjunka/votaciones-cicd/actions/runs/<id>`):
+
+| Id | Qué muestra |
+|---|---|
+| 44334394911 | Run completo en verde con aprobación manual (Release v1.0.3) |
+| 44340166676 | Rollback automático: smoke en rojo, producción vuelve a la 1.0.3 |
+| 44342859850 | Run completo en verde, 9 min 52 s (Release v1.0.8) |
+| 44344815777 | Botón de pánico sin versión: vuelve a la v1.0.3 |
+
+Las capturas están en `sustentacion/public/evidencias/`.
+
+## Hallazgos abiertos
+
+- SonarCloud, análisis general: Security D (46 issues, casi todos de los workflows: acciones sin fijar a un SHA y `pip install` sin hashes) y Reliability C (7). El quality gate (Sonar way, sobre código nuevo) pasa.
+- Discord: sin webhook no hay mensajes. `pendiente`.
+- Valeria no ha aceptado la invitación, así que aún no aprueba PR ni producción.
 
 ## Destruir todo
 
-Cuesta dinero real en la cuenta AWS de Sergio. Al terminar:
+Cuesta dinero real en la cuenta AWS de Sergio: dos ALB y 4 servicios ECS Fargate corren ahora (unos US$3 al día). Destruir después de exponer:
 
 1. Desde `infra/`, por cada workspace:
    ```
@@ -153,5 +172,5 @@ Cuesta dinero real en la cuenta AWS de Sergio. Al terminar:
    aws s3 rb s3://tfstate-votaciones-sjunka --force
    ```
    Si el bucket tiene versiones, `--force` no basta: borrarlas desde la consola o con `aws s3api delete-objects`.
-3. Borrar el usuario IAM de CI y sus llaves, y el rol `LabRole`.
-4. Revocar los tokens de Docker Hub y SonarCloud.
+3. Borrar el usuario IAM `github-cicd-votaciones` con sus llaves, y el rol `LabRole`.
+4. Revocar los tokens de Docker Hub (`EAFIT_PROYECTO`, sin vencimiento) y SonarCloud (`EAFIT_PROYECTO`, 30 días).
