@@ -1,6 +1,6 @@
 # Pipeline
 
-Autor: Sergio Junca. Estado: diseño según el contrato del proyecto. Todavía no hay ejecuciones.
+Autor: Sergio Junca. Estado al 2026-11-18: el pipeline corrió en GitHub Actions contra AWS. Discord está `pendiente` (falta el webhook).
 
 Orquestador: GitHub Actions. Contrastado con los archivos de `.github/workflows/` el 2026-11-18. Archivos en `.github/workflows/`:
 
@@ -127,4 +127,39 @@ Además, el circuit breaker de ECS vuelve a la tarea anterior si la nueva no que
 | `DOCKERHUB_USERNAME` | variable | `build-and-test`, `deploy.yml` |
 | `SONAR_HOST_URL` | variable | `build-and-test` |
 
-Ambientes: `staging`, `production` (revisores Sergio y Valeria) y `production-rollback` (sin revisores).
+Ambientes: `staging`, `production` (revisor `sjunka`; `valri2104` invitada como colaboradora, invitación pendiente de aceptar, cuando acepte se agrega como segunda revisora) y `production-rollback` (sin revisores).
+
+Cargados al 2026-11-18: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN`, `DOCKERHUB_USERNAME` y `SONAR_HOST_URL`. No está `DISCORD_WEBHOOK_URL`: la modificación 3 está implementada y el paso no falla sin webhook, pero todavía no hay mensajes.
+
+## Ejecuciones reales (2026-11-18)
+
+Cada id va en `https://github.com/sjunka/votaciones-cicd/actions/runs/<id>`.
+
+| Run | Resultado | Qué pasó |
+|---|---|---|
+| 44330894625 | Falló, luego se corrigió | Primer intento. SonarCloud dio Quality Gate NONE en el primer análisis; `gh run rerun --failed` lo pasó. `deploy-staging` falló porque `AWS_SECRET_ACCESS_KEY` quedó vacío (error al armarlo con `cut` sobre una salida con tabulador); se regeneraron las llaves y pasó. `test-staging` falló en el E2E |
+| 44334394911 | Verde | Merge del PR 1. El E2E había encontrado un bug real: `crypto.randomUUID` no existe en HTTP (el ALB) y nadie podía votar. El PR lo corrige con `getRandomValues` y una prueba nueva. Aprobación manual de producción por `sjunka`. Release v1.0.3 |
+| 44336684960 | `smoke-test-production` en rojo, rollback omitido | Merge del PR 2 (falla de demostración: `/api/health` responde `degraded` solo con `APP_ENV=production`, así staging pasa y el smoke de producción falla). `rollback-production` quedó omitido porque el `if` por defecto exige que todos los ancestros hayan pasado |
+| 44340166676 | Rojo a propósito | Merge del PR 3, que agrega `always()` con condiciones explícitas en `rollback-production` y `smoke-test-rollback`. Rollback automático correcto: `find-rollback-release`, `rollback-production` (ambiente `production-rollback`, sin aprobación) y `smoke-test-rollback` en verde. Producción volvió a la 1.0.3 (verificado en `/api/health`). Unos 3 minutos entre el smoke rojo (16:00 UTC) y las smoke del rollback en verde (16:03 UTC) |
+| 44342859850 | Verde | Merge del PR 4, que revierte la falla de demostración. 9 min 52 s con la aprobación incluida. gitleaks y Trivy en verde. Release v1.0.8 |
+| 44344815777 | Verde | `Rollback de emergencia`, producción, sin versión: volvió a la v1.0.3 (la Release anterior a la actual), smoke en verde, `/api/health` dice 1.0.3 |
+| 44345534299 | Verde | `Rollback de emergencia`, producción, versión 1.0.8: restauró la 1.0.8 |
+
+PR 5 (alinea las exclusiones de cobertura de Sonar con las de Vitest; Sonar mostraba 45,3 % porque contaba `pages` y `components`) estaba en curso al escribir esto. Crea otra Release.
+
+## Métricas (solo de estas pruebas)
+
+- Intentos de despliegue a producción: 4, 2 buenos y 2 con falla provocada (50 %).
+- Commit a producción: 9 min 52 s.
+- Recuperación: unos 3 minutos.
+
+## Decisiones que se apartan
+
+- El rol admin puede saltarse el ruleset `proteger-main` (PR con 1 aprobación, check `build-and-test`, sin borrar ni force push). Valeria todavía no aceptó la invitación, así que no hay segunda aprobadora.
+- El análisis automático de SonarCloud está apagado: el análisis lo hace el job `build-and-test`.
+- Las llaves de AWS son permanentes (usuario IAM `github-cicd-votaciones`), no OIDC.
+
+## Hallazgos abiertos
+
+- SonarCloud, análisis general: Security D (46 issues, casi todos de los workflows: acciones sin fijar a un SHA y `pip install` sin hashes) y Reliability C (7). El quality gate (Sonar way, sobre código nuevo) pasa.
+- Discord sin webhook.

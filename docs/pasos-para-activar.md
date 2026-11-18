@@ -1,6 +1,26 @@
 # Pasos para activar el pipeline
 
-Autor: Sergio Junca. Lista de lo que hay que hacer a mano para pasar de código listo a pipeline verde, en orden. Nada de AWS, Docker Hub, SonarCloud ni Discord está activo hoy. Los comandos `aws` asumen un perfil con permisos de administrador en la cuenta personal de Sergio (el usuario `sergio-cli` del Taller 3). Reemplazar `<...>` por el valor real.
+Autor: Sergio Junca. Estado al 2026-11-18: casi todo está hecho. Los pasos de abajo quedan como registro y como guía para repetirlo. Los comandos `aws` asumen un perfil con permisos de administrador en la cuenta personal de Sergio (278835524469). Reemplazar `<...>` por el valor real.
+
+## Lo que falta
+
+1. Discord: crear el webhook (hay que iniciar sesión en Discord) y guardarlo con `gh secret set DISCORD_WEBHOOK_URL --repo sjunka/votaciones-cicd`. Después, probar que llegan los avisos (paso 12).
+2. Valeria acepta la invitación en https://github.com/sjunka/votaciones-cicd/invitations. Luego agregarla como segunda revisora del ambiente `production` y que apruebe un PR.
+3. Definir con el profesor si hace falta algo más en Interactiva.
+4. Después de exponer: destruir todo y revocar tokens (pasos 24 a 26).
+
+## Hecho (2026-11-18)
+
+- Repo público creado: https://github.com/sjunka/votaciones-cicd. Pages activo: https://sjunka.github.io/votaciones-cicd/ (pasos 1 y 15).
+- AWS: bucket `tfstate-votaciones-sjunka`, rol `LabRole` creado a mano, usuario IAM `github-cicd-votaciones` con sus llaves en secretos (pasos 3 a 7). Primer intento: la llave secreta quedó vacía y se regeneraron las llaves.
+- Docker Hub: token y variable `DOCKERHUB_USERNAME`; repos `sjunka/votaciones-api` y `sjunka/votaciones-web` con etiquetas `1.0.N` y SHA (paso 8).
+- SonarCloud: proyecto `sjunka_votaciones-cicd`, análisis automático apagado, quality gate Passed; `SONAR_TOKEN` y `SONAR_HOST_URL` cargados. El primer análisis dio Quality Gate NONE y se relanzó con `gh run rerun --failed` (pasos 9 a 11).
+- Ambientes `staging`, `production` (revisor `sjunka`) y `production-rollback` (sin revisores), y ruleset `proteger-main` activo (pasos 13 y 14). La invitación a Valeria está enviada, falta que la acepte (paso 2).
+- Primer run, runs verdes y 2 Releases (v1.0.3 y v1.0.8) (pasos 16 a 18). Run completo en verde de 9 min 52 s.
+- Rollback automático probado con una falla de demostración (run 44340166676) y botón de pánico probado (runs 44344815777 y 44345534299) (pasos 19 y 20).
+- Capturas en `sustentacion/public/evidencias/` (paso 21). Enlaces del README y del reporte actualizados (paso 23).
+
+## Registro de pasos
 
 ## A. Repositorio
 

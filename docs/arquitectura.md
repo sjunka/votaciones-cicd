@@ -1,6 +1,10 @@
 # Arquitectura
 
-Autor: Sergio Junca. Estado: diseño según `infra/` y el contrato del proyecto. Nada de esto corre todavía en AWS.
+Autor: Sergio Junca. Estado al 2026-11-18: corre en AWS (cuenta personal 278835524469, us-east-1). Staging y producción están en la versión 1.0.8 (commit c5a00d4).
+
+- Staging: http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com
+- Producción: http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com
+- Corren 2 ALB y 4 servicios ECS Fargate (unos US$3 al día).
 
 ## Vista general
 
@@ -37,7 +41,7 @@ La web llama a la API con rutas relativas (`/api/...`) por el mismo ALB. Por eso
 | Base de datos | DynamoDB `votaciones-<ambiente>`, facturación bajo demanda, clave de partición `pk` | `infra/main.tf` |
 | ALB | Un balanceador por ambiente, listener HTTP 80, regla `/api/*` hacia la API y acción por defecto hacia la web | `infra/main.tf` |
 | ECS | Un cluster por ambiente, dos servicios con `deployment_circuit_breaker` con rollback activado | `infra/main.tf` |
-| Rol de las tareas | `LabRole`, existente en la cuenta, lo lee Terraform con un data source. Es ejecución y acceso a DynamoDB a la vez | cuenta AWS |
+| Rol de las tareas | `LabRole`, creado a mano en la cuenta (confianza `ecs-tasks`, `AmazonECSTaskExecutionRolePolicy` y `AmazonDynamoDBFullAccess`); lo lee Terraform con un data source. Es ejecución y acceso a DynamoDB a la vez | cuenta AWS |
 | Logs | Un grupo de CloudWatch por servicio y ambiente | `infra/main.tf` |
 | Estado de Terraform | Bucket S3 `tfstate-votaciones-sjunka`, clave `votaciones/terraform.tfstate`, workspaces `staging` y `production` | `infra/backend.hcl` |
 
