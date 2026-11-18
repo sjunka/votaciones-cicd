@@ -57,6 +57,10 @@ describe("api", () => {
     await api.getPoll("abc");
     expect(f.mock.calls[1][0]).toBe("/api/polls/abc");
   });
+  it("genera el voter_id sin randomUUID (contexto HTTP)", () => {
+    vi.stubGlobal("crypto", { getRandomValues: (a) => a.fill(15) });
+    expect(api.voterId()).toBe("0f".repeat(16));
+  });
   it("crea, vota y cierra con los datos del contrato", async () => {
     const f = reply(200, {});
     await api.createPoll("q", ["a", "b"]);
