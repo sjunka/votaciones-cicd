@@ -16,7 +16,7 @@ Autor: Sergio Junca. Estado al 2026-11-18: casi todo está hecho. Los pasos de a
 - Docker Hub: token y variable `DOCKERHUB_USERNAME`; repos `sjunka/votaciones-api` y `sjunka/votaciones-web` con etiquetas `1.0.N` y SHA (paso 8).
 - SonarCloud: proyecto `sjunka_votaciones-cicd`, análisis automático apagado, quality gate Passed; `SONAR_TOKEN` y `SONAR_HOST_URL` cargados. El primer análisis dio Quality Gate NONE y se relanzó con `gh run rerun --failed` (pasos 9 a 11).
 - Ambientes `staging`, `production` (revisor `sjunka`) y `production-rollback` (sin revisores), y ruleset `proteger-main` activo (pasos 13 y 14). La invitación a Valeria está enviada, falta que la acepte (paso 2).
-- Primer run, runs verdes y 2 Releases (v1.0.3 y v1.0.8) (pasos 16 a 18). Run completo en verde de 9 min 52 s.
+- Primer run, runs verdes y 2 Releases (v1.0.3, v1.0.8 y v1.0.12) (pasos 16 a 18). Run completo en verde de 9 min 52 s.
 - Rollback automático probado con una falla de demostración (run 44340166676) y botón de pánico probado (runs 44344815777 y 44345534299) (pasos 19 y 20).
 - Capturas en `sustentacion/public/evidencias/` (paso 21). Enlaces del README y del reporte actualizados (paso 23).
 

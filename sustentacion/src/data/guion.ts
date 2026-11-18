@@ -281,7 +281,7 @@ export const guion: Seccion[] = [
       v('Dos, versionado SemVer. Cada versión que pasa producción queda como Release v1.0.N, con notas automáticas. Son los puntos a los que vuelve el rollback.'),
       v('La Release la crea publish-release con gh release create.'),
       v('Tres, avisos a Discord. Llega un mensaje al desplegar, al fallar y al hacer rollback, con el enlace al run.'),
-      v('La evidencia de la una son los pasos de gitleaks y Trivy en verde, y la de la dos, las Releases v1.0.3 y v1.0.8. La de Discord queda pendiente hasta tener el webhook.'),
+      v('La evidencia de la una son los pasos de gitleaks y Trivy en verde, y la de la dos, las Releases v1.0.3, v1.0.8 y v1.0.12. La de Discord queda pendiente hasta tener el webhook.'),
     ],
     preguntas: [
       {
@@ -299,10 +299,10 @@ export const guion: Seccion[] = [
     tiempoSeg: 75,
     lineas: [
       a('Abrir Evidencia. Están los enlaces a los runs, a las Releases y las capturas de cada ambiente.'),
-      v('Ahora abrimos el run del merge a main en GitHub Actions, el 44342859850.'),
-      v('Se ven los jobs en verde, la aprobación de producción y los logs de cada uno. Duró 9 minutos 52 segundos, con la aprobación manual incluida.'),
+      v('Ahora abrimos el run del merge a main en GitHub Actions, el 44348025068.'),
+      v('Se ven los jobs en verde, la aprobación de producción y los logs de cada uno. Duró 9 minutos 42 segundos, con la aprobación manual incluida.'),
       v('Después el run 44340166676, con smoke-test-production en rojo, rollback-production en verde y producción de vuelta en la v1.0.3 en unos 3 minutos. Ese cambio roto era a propósito.'),
-      v('Y las Releases v1.0.3 y v1.0.8. Un run antes, el 44336684960, el rollback no corrió por una condición mal escrita. La corregimos en el pull request 3. El canal de Discord sigue pendiente. Sergio hace la demo de la app.'),
+      v('Y las Releases v1.0.3, v1.0.8 y v1.0.12. Antes, en el run 44336684960, el rollback no corrió por una condición mal escrita. La corregimos en el pull request 3. El canal de Discord sigue pendiente. Sergio hace la demo de la app.'),
     ],
   },
   {
@@ -316,7 +316,7 @@ export const guion: Seccion[] = [
       a('Orden de la demo. Producción: http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com. Staging: http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com. Encuesta de la demo en producción: /p/G8mR9uj4.'),
       a('Paso 1: mostrar el QR de producción con la pregunta "¿GitHub Actions o CircleCI?". El salón vota.'),
       s('Escaneen el QR y voten. Los porcentajes se mueven cada dos segundos.'),
-      a('Paso 2: staging al lado de producción, los dos en la versión 1.0.8.'),
+      a('Paso 2: staging al lado de producción, los dos en la versión 1.0.12.'),
       s('Staging tiene el banner amarillo y la versión nueva. Producción tiene el verde.'),
       a('Paso 3: lanzar el botón de pánico al inicio de la demo. Mientras corre, Valeria explica las pruebas.'),
       s('Lanzo Rollback de emergencia sobre producción. Mientras corre, Valeria vuelve a las pruebas.'),
