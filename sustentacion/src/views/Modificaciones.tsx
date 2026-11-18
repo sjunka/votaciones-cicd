@@ -1,4 +1,3 @@
-import Pendiente from '../components/Pendiente'
 import { Slide, Tarjeta } from '../components/Slide'
 
 const mods = [
@@ -20,12 +19,17 @@ const mods = [
   },
   {
     n: 3,
-    t: 'Avisos a Discord',
-    cambia: 'Un mensaje al desplegar, al fallar y al hacer rollback, con el enlace al run.',
-    evidencia: 'Canal de Discord con los mensajes.',
-    url: null as string | null,
+    t: 'Workflow reutilizable deploy.yml',
+    cambia: 'Staging, producción, el rollback automático y el botón de pánico llaman al mismo deploy.yml (workflow_call). En el Taller 3 cada despliegue era un job propio.',
+    evidencia: 'Los jobs "deploy-staging / deploy" y "deploy-production / deploy" del run 44348025068 y "rollback / deploy" del run 44344815777.',
+    url: 'https://github.com/sjunka/votaciones-cicd/actions/runs/44344815777',
     color: 'var(--s5)',
   },
+]
+
+const extras = [
+  'Arquitectura nueva frente al Taller 3: dos servicios ECS detrás de un balanceador con regla /api/* y una tabla de DynamoDB.',
+  'Avisos a Discord (notify-failure, notify-rollback, notify): implementados y sin fallar si falta el webhook. Todavía no hay mensajes que mostrar.',
 ]
 
 export default function Modificaciones() {
@@ -38,13 +42,16 @@ export default function Modificaciones() {
             <p>{m.cambia}</p>
             <div className="mt-sm text-[15px] font-semibold text-muted">Evidencia que vamos a mostrar</div>
             <p>{m.evidencia}</p>
-            <div className="mt-sm">{m.url ? <a href={m.url} target="_blank" rel="noreferrer" className="break-all font-mono text-[15px] text-primary-active underline">{m.url}</a> : <Pendiente texto="pendiente: falta el webhook de Discord" />}</div>
+            <div className="mt-sm"><a href={m.url} target="_blank" rel="noreferrer" className="break-all font-mono text-[15px] text-primary-active underline">{m.url}</a></div>
           </Tarjeta>
         ))}
       </div>
-      <p className="mt-lg text-[18px] text-body">
-        Reserva si el profe no acepta alguna: el workflow reutilizable <code>deploy.yml</code>, que usan staging, producción y los 2 rollbacks.
-      </p>
+      <h2 className="mt-xl text-[24px]">Además</h2>
+      <ul className="mt-sm grid gap-xs text-[18px] text-body">
+        {extras.map((e) => (
+          <li key={e} className="rounded-lg border border-hairline bg-card p-md">{e}</li>
+        ))}
+      </ul>
     </Slide>
   )
 }

@@ -11,17 +11,17 @@ export const nodos: Nodo[] = [
   { id: 'c3', x: 520, y: 45, w: 310, h: 170, titulo: 'Test', logo: 'pytest', vertical: true, mod: 'Modificación 1', sub: ['gitleaks, Black, Flake8, Pylint', 'ESLint, terraform fmt y validate', 'pytest + moto, Vitest (80 %)', 'SonarCloud con quality gate'] },
   { id: 'c4', x: 885, y: 45, w: 320, h: 170, titulo: 'Release', logo: 'docker', vertical: true, mod: 'Modificación 1', sub: ['docker build de las 2 imágenes', 'Trivy: falla si hay CRITICAL', 'push 1.0.N y SHA a Docker Hub'] },
 
-  { id: 'j2', x: 910, y: 275, w: 270, h: 100, titulo: 'deploy-staging', monoTitulo: true, num: 2, logo: 'terraform', sub: ['terraform apply', 'workspace staging'] },
+  { id: 'j2', x: 910, y: 275, w: 270, h: 100, titulo: 'deploy-staging', mod: 'Modificación 3', monoTitulo: true, num: 2, logo: 'terraform', sub: ['terraform apply', 'workspace staging'] },
   { id: 'j3', x: 630, y: 275, w: 230, h: 100, titulo: 'test-staging', monoTitulo: true, num: 3, logo: 'selenium', sub: ['pytest + requests', 'Selenium (E2E)'] },
   { id: 'gate', x: 360, y: 275, w: 220, h: 100, titulo: 'Aprobación', tipo: 'puerta', logo: 'lock', sub: ['manual, revisores', 'ambiente production'] },
-  { id: 'j4', x: 30, y: 275, w: 280, h: 100, titulo: 'deploy-production', monoTitulo: true, num: 4, logo: 'terraform', sub: ['terraform apply', 'workspace production'] },
+  { id: 'j4', x: 30, y: 275, w: 280, h: 100, titulo: 'deploy-production', mod: 'Modificación 3', monoTitulo: true, num: 4, logo: 'terraform', sub: ['terraform apply', 'workspace production'] },
 
   { id: 'j5', x: 30, y: 430, w: 340, h: 100, titulo: 'smoke-test-production', monoTitulo: true, num: 5, logo: 'pytest', sub: ['pytest, solo lectura', 'verifica la versión esperada'] },
   { id: 'j6', x: 440, y: 430, w: 300, h: 100, titulo: 'publish-release', monoTitulo: true, num: 6, logo: 'release', mod: 'Modificación 2', sub: ['gh release create', 'notas automáticas'] },
 
   { id: 'j7', x: 30, y: 580, w: 340, h: 100, titulo: 'rollback-production', monoTitulo: true, num: 7, logo: 'github', sub: ['última Release, deploy.yml', 'smoke y aviso'] },
   { id: 'rel', x: 450, y: 580, w: 280, h: 100, titulo: 'GitHub Release', mod: 'Modificación 2', logo: 'release', sub: ['v1.0.N', 'punto de restauración'] },
-  { id: 'dis', x: 800, y: 580, w: 250, h: 100, titulo: 'Discord', mod: 'Modificación 3', logo: 'discord', sub: ['aviso con enlace al run'] },
+  { id: 'dis', x: 800, y: 580, w: 250, h: 100, titulo: 'Discord', mod: 'Extra', logo: 'discord', sub: ['aviso con enlace al run'] },
 ]
 
 export const aristas: Arista[] = [
@@ -62,7 +62,7 @@ export const escenarios: Escenario[] = [
       p('Aprobación manual para producción', 'El ambiente production de GitHub tiene revisores (Sergio y Valeria). El pipeline se detiene hasta que uno apruebe.', ['gate'], ['n3g'], { omitidos: sinRollback, estado: 'espera', aviso: 'Esperando la aprobación de un revisor' }),
       p('deploy-production: el mismo deploy', 'Mismo deploy.yml, workspace production. Es la imagen que ya pasó por staging.', ['j4'], ['g4'], { omitidos: sinRollback }),
       p('smoke-test-production: solo lectura', 'La web carga, /api/health responde ok con la base conectada y la versión esperada. No escribe datos.', ['j5'], ['n45'], { omitidos: ['j7', 'rel'], estado: 'ok', aviso: 'Smoke en verde: la versión quedó en producción' }),
-      p('publish-release y aviso', 'Con las smoke en verde, publish-release crea la Release v1.0.N con notas automáticas (modificación 2) y avisa a Discord (modificación 3).', ['j6', 'rel', 'dis'], ['ok6', 'cr', 'av6'], { omitidos: ['j7'], estado: 'ok', aviso: 'Release v1.0.N publicada y aviso enviado' }),
+      p('publish-release y aviso', 'Con las smoke en verde, publish-release crea la Release v1.0.N con notas automáticas (modificación 2) y avisa a Discord (extra).', ['j6', 'rel', 'dis'], ['ok6', 'cr', 'av6'], { omitidos: ['j7'], estado: 'ok', aviso: 'Release v1.0.N publicada y aviso enviado' }),
     ],
   },
   {
@@ -87,7 +87,7 @@ export const escenarios: Escenario[] = [
       p('rollback-production se dispara', 'Tiene if: failure(): corre cuando falla el deploy o las smoke de producción, y no cuando falla algo anterior.', ['j7'], ['f7', 'f7b'], { omitidos: ['j6'], estado: 'fail', aviso: 'Rollback automático en marcha' }),
       p('Busca la última Release', 'Consulta las Releases de GitHub y toma la última: es la versión buena anterior.', ['j7', 'rel'], ['ur'], { omitidos: ['j6'] }),
       p('Despliega esa versión y repite las smoke', 'Llama a deploy.yml con esa versión, en el workspace production pero con el ambiente production-rollback, que no tiene revisores. Después repite las smoke.', ['j7', 'j5'], [], { omitidos: ['j6'], estado: 'ok', aviso: 'Producción vuelve a responder la versión anterior' }),
-      p('Aviso a Discord', 'Avisa con el enlace al run (modificación 3). El run termina en rojo a propósito: hubo un fallo, aunque producción ya esté sana.', ['j7', 'dis'], ['av7'], { omitidos: ['j6'], estado: 'fail', aviso: 'Run en rojo a propósito' }),
+      p('Aviso a Discord', 'Avisa con el enlace al run (extra). El run termina en rojo a propósito: hubo un fallo, aunque producción ya esté sana.', ['j7', 'dis'], ['av7'], { omitidos: ['j6'], estado: 'fail', aviso: 'Run en rojo a propósito' }),
     ],
   },
 ]

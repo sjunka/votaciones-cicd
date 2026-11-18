@@ -129,7 +129,7 @@ Además, el circuit breaker de ECS vuelve a la tarea anterior si la nueva no que
 
 Ambientes: `staging`, `production` (revisor `sjunka`; `valri2104` invitada como colaboradora, invitación pendiente de aceptar, cuando acepte se agrega como segunda revisora) y `production-rollback` (sin revisores).
 
-Cargados al 2026-11-18: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN`, `DOCKERHUB_USERNAME` y `SONAR_HOST_URL`. No está `DISCORD_WEBHOOK_URL`: la modificación 3 está implementada y el paso no falla sin webhook, pero todavía no hay mensajes.
+Cargados al 2026-11-18: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN`, `DOCKERHUB_USERNAME` y `SONAR_HOST_URL`. No está `DISCORD_WEBHOOK_URL`: los avisos a Discord (un extra, no una de las tres modificaciones) están implementados y no fallan sin webhook, pero todavía no hay mensajes.
 
 ## Ejecuciones reales (2026-11-18)
 

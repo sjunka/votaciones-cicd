@@ -30,7 +30,7 @@ export default function Guion() {
         </button>
       </div>
       <p className="mt-xs text-[18px] text-body">
-        {fmtTiempo(totalSeg)} min (objetivo 15:00) y unas {totalPalabras} palabras dichas, a 130 por minuto. Entre <Chip quien="Sergio" /> y <Chip quien="Valeria" />.
+        {fmtTiempo(totalSeg)} min (objetivo máximo 10:00; los otros 5 minutos son preguntas) y unas {totalPalabras} palabras dichas, a 130 por minuto. Entre <Chip quien="Sergio" /> y <Chip quien="Valeria" />.
         Lo que va entre comillas se dice. Lo gris en cursiva es lo que se muestra o se hace. El recuadro naranja es una pregunta probable y la responde quien tiene esa pantalla.
         Clic en la imagen abre la pantalla en el paso indicado. Los números de paso de los diagramas son supuestos hasta cerrar los diagramas.
       </p>
