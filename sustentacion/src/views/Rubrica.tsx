@@ -11,20 +11,20 @@ const puntos: Fila[] = [
   { n: 4, texto: 'Versionamiento en el pipeline: qué corre en qué evento', ruta: '/ramas', vista: 'Ramas' },
   { n: 5, texto: 'Diagrama de arquitectura de software', ruta: '/arquitectura', vista: 'Arquitectura' },
   { n: 6, texto: 'Pruebas: ambiente, qué valida y por qué', ruta: '/pruebas', vista: 'Pruebas' },
-  { n: 7, texto: 'Pipelines ejecutados con éxito, con logs', ruta: '/evidencia', vista: 'Evidencia', pendiente: 'falta el run real' },
-  { n: 8, texto: 'Evidencia de las 3 modificaciones', ruta: '/modificaciones', vista: 'Modificaciones', pendiente: 'faltan logs, Releases y Discord' },
-  { n: 9, texto: 'App funcionando en cada ambiente', ruta: '/evidencia', vista: 'Evidencia', pendiente: 'faltan las URLs de AWS' },
+  { n: 7, texto: 'Pipelines ejecutados con éxito, con logs', ruta: '/evidencia', vista: 'Evidencia' },
+  { n: 8, texto: 'Evidencia de las 3 modificaciones', ruta: '/modificaciones', vista: 'Modificaciones', pendiente: 'falta Discord' },
+  { n: 9, texto: 'App funcionando en cada ambiente', ruta: '/evidencia', vista: 'Evidencia' },
   { n: 10, texto: 'Desafíos y aprendizajes', ruta: '/aprendizajes', vista: 'Aprendizajes' },
 ]
 
 const minimos: Fila[] = [
   { texto: 'CI: Checkout, Build, Test (estáticas, unitarias y cobertura) y Release', ruta: '/pipeline', vista: 'Pipeline' },
-  { texto: 'CD: IaC, Deploy Infra y Deploy App en 2 ambientes', ruta: '/arquitectura', vista: 'Arquitectura', pendiente: 'falta el run en AWS' },
+  { texto: 'CD: IaC, Deploy Infra y Deploy App en 2 ambientes', ruta: '/arquitectura', vista: 'Arquitectura' },
   { texto: 'CD: Tests pre-prod y post-prod (smoke)', ruta: '/pruebas', vista: 'Pruebas' },
-  { texto: 'Rollback automático ante fallo de smoke', ruta: '/rollback', vista: 'Rollback', pendiente: 'falta el run con rollback' },
-  { texto: 'Rollback manual (botón de pánico)', ruta: '/rollback', vista: 'Rollback', pendiente: 'falta usarlo en AWS' },
+  { texto: 'Rollback automático ante fallo de smoke', ruta: '/rollback', vista: 'Rollback' },
+  { texto: 'Rollback manual (botón de pánico)', ruta: '/rollback', vista: 'Rollback' },
   { texto: 'Estrategia de ramas sustentada', ruta: '/ramas', vista: 'Ramas' },
-  { texto: '3 modificaciones o introducciones', ruta: '/modificaciones', vista: 'Modificaciones', pendiente: 'faltan logs, Releases y Discord' },
+  { texto: '3 modificaciones o introducciones', ruta: '/modificaciones', vista: 'Modificaciones', pendiente: 'falta Discord' },
 ]
 
 function Lista({ filas }: { filas: Fila[] }) {
@@ -50,7 +50,7 @@ export default function Rubrica() {
       <h2 className="mt-xl text-[28px]">Mínimos del pipeline</h2>
       <div className="mt-sm"><Lista filas={minimos} /></div>
       <p className="mt-md text-[16px] text-muted">
-        "Listo en la app" significa que la vista está hecha. "Pendiente" es la evidencia real que depende de correr el pipeline en AWS.
+        "Listo en la app" significa que la vista está hecha. "Pendiente" es lo que falta: el canal de Discord para la modificación 3.
       </p>
     </Slide>
   )
