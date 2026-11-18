@@ -6,14 +6,16 @@ const mods = [
     n: 1,
     t: 'DevSecOps: gitleaks y Trivy',
     cambia: 'build-and-test busca secretos en el código y en el historial (gitleaks) y escanea las 2 imágenes (Trivy). Falla si hay vulnerabilidades críticas.',
-    evidencia: 'Logs de los dos pasos. Idea: un run en rojo por una vulnerabilidad y el PR que la arregla.',
+    evidencia: 'Los pasos "Run gitleaks (Secrets)" y "Trivy scan" en verde del run 44342859850.',
+    url: 'https://github.com/sjunka/votaciones-cicd/actions/runs/44342859850',
     color: 'var(--s2)',
   },
   {
     n: 2,
     t: 'Versionado SemVer y GitHub Releases',
     cambia: 'Cada versión que pasa producción queda como Release v1.0.N con notas automáticas. El rollback vuelve a esas Releases.',
-    evidencia: 'Página de Releases, y la versión en el banner de la app y en /api/health.',
+    evidencia: 'Releases v1.0.3 y v1.0.8, y la versión en el banner de la app y en /api/health.',
+    url: 'https://github.com/sjunka/votaciones-cicd/releases',
     color: 'var(--s3)',
   },
   {
@@ -21,6 +23,7 @@ const mods = [
     t: 'Avisos a Discord',
     cambia: 'Un mensaje al desplegar, al fallar y al hacer rollback, con el enlace al run.',
     evidencia: 'Canal de Discord con los mensajes.',
+    url: null as string | null,
     color: 'var(--s5)',
   },
 ]
@@ -35,7 +38,7 @@ export default function Modificaciones() {
             <p>{m.cambia}</p>
             <div className="mt-sm text-[15px] font-semibold text-muted">Evidencia que vamos a mostrar</div>
             <p>{m.evidencia}</p>
-            <div className="mt-sm"><Pendiente texto="pendiente: evidencia real" /></div>
+            <div className="mt-sm">{m.url ? <a href={m.url} target="_blank" rel="noreferrer" className="break-all font-mono text-[15px] text-primary-active underline">{m.url}</a> : <Pendiente texto="pendiente: falta el webhook de Discord" />}</div>
           </Tarjeta>
         ))}
       </div>
