@@ -332,6 +332,8 @@ jobs:
 
   rollback-production:
     needs: find-rollback-release
+    # Sin always() el if por defecto (success) exige que todos los ancestros pasen y el smoke falló
+    if: always() && needs.find-rollback-release.result == 'success'
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
@@ -342,6 +344,7 @@ jobs:
 
   smoke-test-rollback:
     needs: [find-rollback-release, rollback-production]
+    if: always() && needs.rollback-production.result == 'success'
     runs-on: ubuntu-latest
     env:
       APP_BASE_URL: ${{ needs.rollback-production.outputs.alb_url }}
