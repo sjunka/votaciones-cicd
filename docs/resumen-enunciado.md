@@ -9,7 +9,7 @@ Un artefacto de software distinto al de clase, con complejidad media (al menos d
 ## Cómo es la presentación
 
 - Sábado 2026-11-21, al inicio de la clase de las 8 am. La diapositiva dice "25 de abril": es la fecha de la cohorte anterior, el profe ya confirmó el 21 de noviembre.
-- Unos 15 minutos por equipo más un espacio de preguntas.
+- Unos 15 minutos por equipo en total: 10 de exposición y 5 de preguntas (ajuste del guion al 2026-11-18).
 - El profe pide un par de slides o un demo con el contexto de la solución, lo construido y las particularidades de los pipelines (resumen ejecutivo).
 - Después de las presentaciones, la segunda parte de la clase es el foro sobre DORA.
 

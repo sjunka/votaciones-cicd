@@ -45,7 +45,7 @@ export const escenarios: Escenario[] = [
       { titulo: 'Busca la última Release', texto: 'La versión nueva no pasó las smoke, así que no tiene Release. La última Release es la versión buena anterior.', nodos: ['rb', 'rel'], aristas: ['a2'], omitidos: soloManual },
       { titulo: 'deploy.yml con production-rollback', texto: 'Llama al mismo deploy.yml con esa versión, en el workspace production de Terraform y con el ambiente de GitHub production-rollback. Ese ambiente no tiene revisores: volver no espera aprobación.', nodos: ['rel', 'dep', 'prod'], aristas: ['c1', 'c2'], omitidos: soloManual },
       { titulo: 'Repite las smoke', texto: 'Las mismas smoke de siempre contra la versión restaurada: web, /api/health y la versión esperada.', nodos: ['prod', 'sm2'], aristas: ['c3'], omitidos: soloManual, estado: 'ok', aviso: 'Producción responde la versión anterior' },
-      { titulo: 'Aviso a Discord', texto: 'Discord recibe el mensaje con el enlace al run (modificación 3).', nodos: ['sm2', 'dis'], aristas: ['c4'], omitidos: soloManual },
+      { titulo: 'Aviso a Discord', texto: 'Discord recibe el mensaje con el enlace al run (extra).', nodos: ['sm2', 'dis'], aristas: ['c4'], omitidos: soloManual },
       { titulo: 'El run termina en rojo a propósito', texto: 'Hubo un fallo, aunque producción ya esté sana. El rojo deja constancia de que la versión nueva no pasó.', nodos: ['dis', 'red'], aristas: ['c5'], omitidos: soloManual, estado: 'fail', aviso: 'Run en rojo a propósito' },
     ],
   },

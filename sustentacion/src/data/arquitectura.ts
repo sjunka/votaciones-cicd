@@ -57,7 +57,7 @@ export const escenarios: Escenario[] = [
       { titulo: 'Las imágenes vienen de Docker Hub', texto: 'Las dos tareas descargan votaciones-api y votaciones-web de Docker Hub con la etiqueta 1.0.N. GitHub Actions las publicó en el job build-and-test.', nodos: ['gha', 'hub', 'amb'], aristas: ['g3', 'g4'], omitidos: sin2 },
       { titulo: 'LabRole y CloudWatch', texto: 'Las tareas usan el rol LabRole, que se crea a mano. Cada servicio escribe sus logs en su propio grupo de CloudWatch.', nodos: ['role', 'cw', 'amb'], aristas: ['g5', 'g6'], omitidos: sin2 },
       { titulo: 'Terraform crea el ambiente', texto: 'deploy.yml corre terraform apply en el workspace staging y guarda el estado en el bucket de S3.', nodos: ['gha', 'amb', 's3'], aristas: ['g1', 'g2'], omitidos: sin2 },
-      { titulo: 'Discord recibe los avisos', texto: 'GitHub Actions avisa a Discord al desplegar, al fallar y al hacer rollback (modificación 3).', nodos: ['gha', 'dis'], aristas: ['g7'], omitidos: sin2 },
+      { titulo: 'Discord recibe los avisos', texto: 'GitHub Actions avisa a Discord al desplegar, al fallar y al hacer rollback (extra, falta el webhook).', nodos: ['gha', 'dis'], aristas: ['g7'], omitidos: sin2 },
     ],
   },
   {

@@ -96,7 +96,9 @@ Las tres modificaciones respecto al Taller 3:
 
 1. DevSecOps: gitleaks busca secretos y Trivy escanea las 2 imágenes (falla con CVE críticos).
 2. SemVer `1.0.N` y GitHub Releases como puntos de restauración.
-3. Avisos a Discord al desplegar, al fallar y al hacer rollback.
+3. Workflow reutilizable `deploy.yml`: staging, producción, el rollback automático y el botón de pánico lo llaman.
+
+Extras: la arquitectura nueva (dos servicios ECS, regla `/api/*` del balanceador y DynamoDB) y los avisos a Discord, implementados y a la espera del webhook.
 
 ## Estrategia de ramas
 

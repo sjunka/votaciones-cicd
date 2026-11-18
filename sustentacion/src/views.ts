@@ -38,7 +38,7 @@ export const vistas: Vista[] = [
   { id: 'evidencia', ruta: '/evidencia', titulo: 'Evidencia', descripcion: 'Runs, capturas y enlaces por ambiente. Lo que falta aparece como pendiente.', tipo: 'slide', componente: Evidencia },
   { id: 'aprendizajes', ruta: '/aprendizajes', titulo: 'Aprendizajes', descripcion: 'Desafíos que tuvimos y qué aprendimos.', tipo: 'slide', componente: Aprendizajes },
   { id: 'alternativas', ruta: '/alternativas', titulo: 'Alternativas', descripcion: 'Decisiones tomadas y alternativas descartadas (respaldo para preguntas).', tipo: 'slide', componente: Alternativas },
-  { id: 'guion', ruta: '/guion', titulo: 'Guion', descripcion: 'Guion de 15 minutos para dos voces y posibles preguntas.', tipo: 'guion', componente: Guion },
+  { id: 'guion', ruta: '/guion', titulo: 'Guion', descripcion: 'Guion de 10 minutos para dos voces, con las preguntas probables para los 5 minutos finales.', tipo: 'guion', componente: Guion },
 ]
 
 export const URL_BASE = 'https://sjunka.github.io/votaciones-cicd/'
