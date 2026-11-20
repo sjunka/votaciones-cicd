@@ -26,32 +26,41 @@ export default function Home() {
   }
 
   return (
-    <form onSubmit={submit}>
-      <h1>Nueva encuesta</h1>
-      <input
-        data-testid="new-question"
-        placeholder="Pregunta"
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-      />
-      {options.map((o, i) => (
+    <form onSubmit={submit} className="create">
+      <h1>Pregunta algo a la sala</h1>
+      <p className="lede">Crea la encuesta, proyecta el QR y mira cómo llegan los votos en vivo.</p>
+      <div className="card">
+        <label htmlFor="q">Pregunta</label>
         <input
-          key={i}
-          data-testid={`new-option-${i}`}
-          placeholder={`Opción ${i + 1}`}
-          value={o}
-          onChange={(e) => setOption(i, e.target.value)}
+          id="q"
+          className="question-input"
+          data-testid="new-question"
+          placeholder="¿Qué lenguaje usamos en el próximo proyecto?"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
         />
-      ))}
-      {options.length < 6 && (
-        <button type="button" className="ghost" data-testid="add-option" onClick={() => setOptions([...options, ""])}>
-          + Agregar opción
+        <label htmlFor="o0">Opciones</label>
+        {options.map((o, i) => (
+          <input
+            key={i}
+            id={`o${i}`}
+            aria-label={`Opción ${i + 1}`}
+            data-testid={`new-option-${i}`}
+            placeholder={`Opción ${i + 1}`}
+            value={o}
+            onChange={(e) => setOption(i, e.target.value)}
+          />
+        ))}
+        {options.length < 6 && (
+          <button type="button" className="ghost" data-testid="add-option" onClick={() => setOptions([...options, ""])}>
+            + Agregar opción
+          </button>
+        )}
+        {error && <p className="error" role="alert">{error}</p>}
+        <button type="submit" className="primary" data-testid="create-poll">
+          Crear encuesta
         </button>
-      )}
-      {error && <p className="error">{error}</p>}
-      <button type="submit" data-testid="create-poll">
-        Crear encuesta
-      </button>
+      </div>
     </form>
   );
 }

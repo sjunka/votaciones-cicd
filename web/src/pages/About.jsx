@@ -9,9 +9,10 @@ export default function About() {
     getHealth().then(setH, () => setH({}));
   }, []);
   return (
-    <section>
+    <section className="card create">
       <h1>Acerca de esta versión</h1>
-      <dl>
+      <p className="lede">Datos que publica el pipeline en cada despliegue.</p>
+      <dl className="facts">
         <dt>Versión</dt>
         <dd>{h?.version ?? "..."}</dd>
         <dt>Commit</dt>
@@ -19,8 +20,10 @@ export default function About() {
         <dt>Ambiente</dt>
         <dd>{h?.environment ?? "..."}</dd>
       </dl>
-      <p><a href={`${REPO}/releases`}>Releases</a></p>
-      <p><a href={`${REPO}/actions`}>Ejecuciones del pipeline</a></p>
+      <p className="links">
+        <a href={`${REPO}/releases`}>Releases</a>
+        <a href={`${REPO}/actions`}>Ejecuciones del pipeline</a>
+      </p>
     </section>
   );
 }
