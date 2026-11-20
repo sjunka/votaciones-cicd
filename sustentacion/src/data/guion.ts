@@ -225,7 +225,7 @@ export const guion: Seccion[] = [
       a('Abrir Modificaciones. Una tarjeta por modificación, con su enlace.'),
       v('Tres modificaciones frente al Taller 3. El rollback y el botón de pánico son mínimos del enunciado, no los contamos.'),
       v('Una, DevSecOps: gitleaks busca secretos en el código y el historial, y Trivy escanea las dos imágenes. Los dos corren en build-and-test.'),
-      v('Dos, versionado SemVer: cada versión que pasa producción queda como Release v1.0.N. Hoy hay tres.'),
+      v('Dos, versionado SemVer: cada versión que pasa producción queda como Release v1.0.N. Hoy hay cuatro.'),
       v('Tres, un workflow reutilizable: deploy.yml lo usan staging, producción, el rollback automático y el botón de pánico.'),
       v('Además la arquitectura es nueva: dos servicios con una regla del balanceador y DynamoDB. Y dejamos avisos a Discord implementados, a la espera del webhook.'),
     ],

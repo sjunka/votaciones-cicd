@@ -4,6 +4,25 @@ Fuente: diapositiva "Proyecto final en grupos" (foto en `material/proyecto-final
 
 Exposición: 10 minutos más 5 de preguntas. El guion suma 9:10 (vista Guion de la app).
 
+## Rúbrica de evaluación (14 criterios, enviada por el profe el 2026-11-20)
+
+| # | Criterio | Cumple | Dónde se muestra |
+|---|---|---|---|
+| 1 | Artefacto: propósito, funcionalidades y complejidad | Sí | Vista Artefacto |
+| 2 | Estrategia de versionamiento o ramificación | Sí | Vista Ramas |
+| 3 | Flujograma del pipeline y herramientas | Sí | Vista Pipeline |
+| 4 | Integración entre ramas/eventos y pipelines | Sí | Vista Ramas, tabla de eventos |
+| 5 | Arquitectura de software e infraestructura | Sí | Vista Arquitectura |
+| 6 | CI con Checkout, Build, Test y Release | Sí | Job `build-and-test` y `publish-release` |
+| 7 | CD con IaC e infra y app en 2 ambientes | Sí | Terraform, `deploy-staging` y `deploy-production` |
+| 8 | Pruebas estáticas, unitarias, cobertura, pre y post prod | Sí | Vista Pruebas, Sonar 98,5 % |
+| 9 | Pipelines en verde con logs | Sí | Runs 44809582134 y 44348025068 |
+| 10 | Evidencia de las 3 mejoras | Sí | Vista Modificaciones |
+| 11 | App funcional en todos los ambientes | Sí | Staging y producción en v1.0.18 |
+| 12 | Rollback automático y manual | Sí | Runs 44340166676 y 44344815777 |
+| 13 | Desafíos, decisiones y aprendizajes | Sí | Vistas Aprendizajes y Alternativas |
+| 14 | Respuestas técnicas al jurado | Preparado | Vista Alternativas y hoja de respuestas |
+
 ## Los 10 puntos de la presentación
 
 | # | Punto | Cumple | Dónde se muestra |
@@ -16,7 +35,7 @@ Exposición: 10 minutos más 5 de preguntas. El guion suma 9:10 (vista Guion de 
 | 6 | Pruebas: ambiente, qué valida y por qué | Sí | Vista Pruebas |
 | 7 | Evidencia de pipelines exitosos en GitHub Actions | Sí | Runs 44348025068 y 44340166676 (vista Evidencia) |
 | 8 | Evidencia de las 3 modificaciones | Sí | Vista Modificaciones: DevSecOps, SemVer con Releases y `deploy.yml` reutilizable |
-| 9 | App funcional en cada ambiente | Sí | Staging y producción en la v1.0.12 (vista Evidencia y demo) |
+| 9 | App funcional en cada ambiente | Sí | Staging y producción en la v1.0.18 (vista Evidencia y demo) |
 | 10 | Desafíos y aprendizajes | Sí | Vista Aprendizajes |
 
 ## Mínimo del pipeline

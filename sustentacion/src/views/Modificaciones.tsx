@@ -13,7 +13,7 @@ const mods = [
     n: 2,
     t: 'Versionado SemVer y GitHub Releases',
     cambia: 'Cada versión que pasa producción queda como Release v1.0.N con notas automáticas. El rollback vuelve a esas Releases.',
-    evidencia: 'Releases v1.0.3, v1.0.8 y v1.0.12, y la versión en el banner de la app y en /api/health.',
+    evidencia: 'Releases v1.0.3, v1.0.8, v1.0.12 y v1.0.18, y la versión en el banner de la app y en /api/health.',
     url: 'https://github.com/sjunka/votaciones-cicd/releases',
     color: 'var(--s3)',
   },
