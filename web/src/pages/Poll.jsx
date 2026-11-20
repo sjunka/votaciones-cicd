@@ -44,33 +44,47 @@ export default function Poll() {
   if (notFound) return <p className="error">La encuesta no existe. <Link to="/">Crear una</Link></p>;
   if (!poll) return <p>Cargando...</p>;
   const pct = percents(poll.options.map((o) => o.votes));
+  const top = Math.max(...poll.options.map((o) => o.votes));
 
   return (
-    <section>
-      <h1 data-testid="poll-question">{poll.question}</h1>
-      {poll.options.map((o, i) => (
-        <div key={o.id} className="option">
-          <button data-testid={`option-${i}`} disabled={poll.closed} onClick={() => onVote(o.id)}>
-            {o.text}
-          </button>
-          <div className="bar">
-            <div style={{ width: `${pct[i]}%` }} />
-          </div>
-          <span data-testid={`percent-${i}`}>{pct[i]}%</span>
+    <section className="poll">
+      <div>
+        <div className={`live${poll.closed ? " closed" : ""}`}>
+          <span className="live-dot" aria-hidden="true" />
+          {poll.closed ? "Votación cerrada" : "En vivo"}
         </div>
-      ))}
-      <p data-testid="vote-count">{poll.total_votes} votos</p>
-      {notice && <p className="notice">{notice}</p>}
-      {poll.closed && <p className="notice" data-testid="closed-notice">Encuesta cerrada</p>}
-      {admin && !poll.closed && (
-        <button className="ghost" data-testid="close-button" onClick={onClose}>
-          Cerrar encuesta
-        </button>
-      )}
-      <div className="qr">
-        <QRCodeSVG value={window.location.href} size={256} />
-        <a data-testid="poll-link" href={window.location.href}>{window.location.href}</a>
+        <h1 data-testid="poll-question">{poll.question}</h1>
+        <div className="options">
+          {poll.options.map((o, i) => (
+            <button
+              key={o.id}
+              className={`option${top > 0 && o.votes === top ? " leader" : ""}`}
+              data-testid={`option-${i}`}
+              disabled={poll.closed}
+              onClick={() => onVote(o.id)}
+            >
+              <span className="fill" style={{ width: `${pct[i]}%` }} aria-hidden="true" />
+              <span className="option-text">{o.text}</span>
+              <span className="option-votes">{o.votes} {o.votes === 1 ? "voto" : "votos"}</span>
+              <span className="option-pct" data-testid={`percent-${i}`}>{pct[i]}%</span>
+            </button>
+          ))}
+        </div>
+        <p className="total" data-testid="vote-count"><strong>{poll.total_votes}</strong> votos</p>
+        {notice && <p className="notice" role="status">{notice}</p>}
+        {poll.closed && <p className="notice closed" data-testid="closed-notice">Encuesta cerrada</p>}
+        {admin && !poll.closed && (
+          <button className="ghost" data-testid="close-button" onClick={onClose}>
+            Cerrar encuesta
+          </button>
+        )}
       </div>
+      <aside className="qr card">
+        <h2>Escanea y vota</h2>
+        <QRCodeSVG value={window.location.href} size={240} fgColor="#16151a" bgColor="#fffdf8" />
+        <p>Un voto por dispositivo</p>
+        <a data-testid="poll-link" href={window.location.href}>{window.location.href}</a>
+      </aside>
     </section>
   );
 }

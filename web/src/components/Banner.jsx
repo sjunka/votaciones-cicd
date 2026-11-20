@@ -13,11 +13,20 @@ export default function Banner() {
   const cls = env in LABELS ? env : "other";
   return (
     <header className={`banner ${cls}`} data-testid="env-banner">
-      <Link to="/">Votaciones</Link>
-      <span>{LABELS[env] ?? env.toUpperCase()}</span>
-      <Link to="/acerca" data-testid="version">
-        {health?.version ? `v${health.version}` : ""}
-      </Link>
+      <div className="banner-inner">
+        <Link to="/" className="brand">
+          <svg className="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+            <rect x="2" y="14" width="6" height="10" rx="2" fill="#16151a" />
+            <rect x="10" y="4" width="6" height="20" rx="2" fill="#e8491d" />
+            <rect x="18" y="10" width="6" height="14" rx="2" fill="#16151a" />
+          </svg>
+          Votaciones
+        </Link>
+        <span className="env">{LABELS[env] ?? env.toUpperCase()}</span>
+        <Link to="/acerca" className="version" data-testid="version">
+          {health?.version ? `v${health.version}` : ""}
+        </Link>
+      </div>
     </header>
   );
 }
