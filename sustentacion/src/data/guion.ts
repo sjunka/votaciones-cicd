@@ -15,6 +15,7 @@ export interface Seccion {
   tiempoSeg: number
   lineas: Linea[]
   preguntas?: { pregunta: string; respuesta: string }[]
+  ficha: { clave: string[]; idea: string } // memoficha para el celular: 3 claves y la idea que debe quedar
 }
 
 export const colorQuien: Record<Quien, string> = { Sergio: '#2f6fe4', Valeria: '#b0397a' }
@@ -35,6 +36,7 @@ export const guion: Seccion[] = [
     ruta: '#/resumen',
     captura: 'capturas/2-resumen.png',
     tiempoSeg: 45,
+    ficha: { clave: ['App de votación en vivo: QR y se vota desde el celular', 'Un repo: web, api, infra y tests', 'ci-cd.yml despliega a staging y producción en AWS', 'Desde Taller 3: +rollback, botón de pánico, 3 mejoras'], idea: 'Un pipeline lleva cada cambio de main hasta producción, con vuelta atrás.' },
     lineas: [
       a('Abrir Resumen. Recorrer las tarjetas y terminar en la línea de tiempo.'),
       s('Buenos días. Soy Sergio Junca y con Valeria Cardona presentamos el proyecto final.'),
@@ -50,6 +52,7 @@ export const guion: Seccion[] = [
     ruta: '#/artefacto',
     captura: 'capturas/3-artefacto.png',
     tiempoSeg: 40,
+    ficha: { clave: ['Crear pregunta con 2 a 6 opciones, resultados cada 2 s', 'React + nginx, Flask, DynamoDB', '2 servicios tras un ALB: complejidad media', 'Votos en DynamoDB: deploy o rollback no los borra'], idea: 'Tres piezas, reglas que probar y datos que sobreviven al deploy.' },
     lineas: [
       a('Abrir Artefacto. Señalar las 3 piezas.'),
       s('Alguien crea una pregunta con dos a seis opciones. La app muestra un QR y los resultados se refrescan cada dos segundos.'),
@@ -75,6 +78,7 @@ export const guion: Seccion[] = [
     ruta: '#/ramas?esc=pr&paso=3',
     captura: 'capturas/4-ramas.png',
     tiempoSeg: 50,
+    ficha: { clave: ['Trunk-based: main + feature/* cortas', 'Ruleset proteger-main: PR + build-and-test', 'PR: solo CI. Push a main: CI y CD', 'workflow_dispatch: rollback manual', 'Versión 1.0.N + SHA en cada imagen'], idea: 'Una imagen se construye una vez y se promueve a todos los ambientes.' },
     lineas: [
       a('Abrir Ramas, escenario Pull request. Pasos 1 a 4: la rama, el PR, el check y el ruleset.'),
       s('Usamos trunk-based: una rama main y ramas cortas feature/*. El ruleset proteger-main pide un pull request y que pase build-and-test.'),
@@ -102,6 +106,7 @@ export const guion: Seccion[] = [
     ruta: '#/pipeline?esc=normal&paso=1',
     captura: 'capturas/5-pipeline.png',
     tiempoSeg: 75,
+    ficha: { clave: ['GitHub Actions, Docker, Terraform, SonarCloud, Trivy, gitleaks, pytest, Selenium', 'CI: Checkout, Test (80 % cobertura), Build, Release a Docker Hub', 'CD: deploy.yml + Terraform (IaC) en staging', 'Aprobación manual y luego producción + smoke', 'Smoke OK: Release v1.0.N. Falla: rollback'], idea: 'CI prueba y publica; CD crea la infra con Terraform y despliega en 2 ambientes.' },
     lineas: [
       a('Abrir Pipeline, escenario Flujo normal. Pasos 1 a 4: build-and-test.'),
       v('Este es ci-cd.yml en GitHub Actions. Las herramientas: Docker, Terraform, SonarCloud, Trivy, gitleaks, pytest, Selenium y AWS.'),
@@ -132,6 +137,7 @@ export const guion: Seccion[] = [
     ruta: '#/arquitectura?esc=ambiente&paso=1',
     captura: 'capturas/7-arquitectura.png',
     tiempoSeg: 45,
+    ficha: { clave: ['ALB puerto 80: /api/* a la API, el resto a la web', 'Fargate por servicio, DynamoDB por ambiente', 'Fuera: Docker Hub, S3 (tfstate), CloudWatch', 'Banner amarillo staging, verde producción'], idea: 'Dos ambientes idénticos con la misma imagen.' },
     lineas: [
       a('Abrir Arquitectura, escenario Ambiente. Pasos 1 a 4, de izquierda a derecha.'),
       s('Cada ambiente es igual. Entra un Application Load Balancer por el puerto 80. Una regla manda /api/* al target group de la API y lo demás al de la web.'),
@@ -159,6 +165,7 @@ export const guion: Seccion[] = [
     ruta: '#/pruebas',
     captura: 'capturas/8-pruebas.png',
     tiempoSeg: 50,
+    ficha: { clave: ['Estáticas: lint, gitleaks, terraform validate, Sonar, Trivy', 'Unitarias: pytest + moto, Vitest. Mín. 80 %, Sonar 98,5 %', 'Pre-prod (staging): integración + Selenium', 'Post-prod: smoke de solo lectura'], idea: 'Cada prueba corre en el lugar más barato donde puede fallar.' },
     lineas: [
       a('Abrir Pruebas. Recorrer la tabla por la columna Dónde.'),
       v('Cada prueba corre en el lugar más barato donde puede fallar.'),
@@ -189,6 +196,7 @@ export const guion: Seccion[] = [
     ruta: '#/rollback?esc=auto&paso=1',
     captura: 'capturas/9-rollback.png',
     tiempoSeg: 55,
+    ficha: { clave: ['Automático: smoke fallan, vuelve a la última Release', 'Pánico: workflow manual, elige ambiente y versión', 'Ambos usan el mismo deploy.yml', 'production-rollback no tiene revisores'], idea: 'La aprobación protege el avance, no el regreso.' },
     lineas: [
       a('Abrir Rollback, escenario Rollback automático. Pasos 1 a 3.'),
       s('Automático: si fallan las smoke de producción, corre rollback-production. Busca la última Release, que es la versión buena anterior, porque la Release se crea solo cuando pasan las smoke.'),
@@ -223,6 +231,7 @@ export const guion: Seccion[] = [
     ruta: '#/modificaciones',
     captura: 'capturas/10-modificaciones.png',
     tiempoSeg: 45,
+    ficha: { clave: ['1. DevSecOps: gitleaks + Trivy', '2. SemVer: Release v1.0.N, hoy 5', '3. Workflow reutilizable deploy.yml', 'Extra: avisos a Discord (no cuenta)'], idea: 'Tres cambios nuevos frente al Taller 3, cada uno con evidencia.' },
     lineas: [
       a('Abrir Modificaciones. Una tarjeta por modificación, con su enlace.'),
       v('Tres modificaciones frente al Taller 3. El rollback y el botón de pánico son mínimos del enunciado, no los contamos.'),
@@ -249,6 +258,7 @@ export const guion: Seccion[] = [
     ruta: '#/evidencia',
     captura: 'capturas/11-evidencia.png',
     tiempoSeg: 40,
+    ficha: { clave: ['Run 44348025068: todo verde, 9:42 con aprobación', 'Run 44340166676: smoke rojo, rollback a v1.0.3 en ~3 min', 'Run 44336684960: rollback no corrió, arreglado en PR 3'], idea: 'Los logs prueban que el pipeline avanza y regresa solo.' },
     lineas: [
       a('Abrir Evidencia. Abrir el run 44348025068 y luego el 44340166676.'),
       v('Este es el run del merge a main, el 44348025068: todos los jobs en verde, la aprobación de producción y los logs. Duró 9 minutos 42 segundos con la aprobación incluida.'),
@@ -263,6 +273,7 @@ export const guion: Seccion[] = [
     ruta: '#/evidencia',
     captura: 'capturas/12-demo.png',
     tiempoSeg: 60,
+    ficha: { clave: ['QR de producción: /p/G8mR9uj4', 'Staging y producción en 1.0.20', 'Botón de pánico: mostrar run 44344815777'], idea: 'La app funciona en los dos ambientes con la misma versión.' },
     lineas: [
       a('Orden de la demo. Producción: https://d1ypwe0ox2c5in.cloudfront.net. Staging: https://d1y5ajf6tjhnl7.cloudfront.net. Encuesta de producción: /p/G8mR9uj4.'),
       a('Paso 1: mostrar el QR de producción con la pregunta "¿GitHub Actions o CircleCI?".'),
@@ -279,6 +290,7 @@ export const guion: Seccion[] = [
     ruta: '#/aprendizajes',
     captura: 'capturas/13-aprendizajes.png',
     tiempoSeg: 35,
+    ficha: { clave: ['crypto.randomUUID falla por HTTP: lo halló el E2E', 'if de job necesita always() para el rollback', 'Aprobación protege avance, no regreso', 'AWS personal: se destruye al terminar'], idea: 'Probar contra el ambiente real encuentra lo que local esconde.' },
     lineas: [
       a('Abrir Aprendizajes. Turnarse tarjeta por tarjeta.'),
       s('Primero, el E2E contra el balanceador nos mostró un bug que en local no existía: crypto.randomUUID no funciona por HTTP.'),
@@ -300,6 +312,7 @@ export const guion: Seccion[] = [
     ruta: '#/rubrica',
     captura: 'capturas/14-cierre.png',
     tiempoSeg: 10,
+    ficha: { clave: ['Un repo, 7 jobs en ci-cd.yml', '2 ambientes, 2 formas de volver atrás'], idea: 'Quedamos atentos a las preguntas.' },
     lineas: [
       a('Abrir Rúbrica.'),
       v('Un repositorio, siete jobs en ci-cd.yml, dos ambientes y dos formas de volver atrás. Quedamos atentos a las preguntas.'),

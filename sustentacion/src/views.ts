@@ -14,6 +14,7 @@ import Evidencia from './views/Evidencia'
 import Aprendizajes from './views/Aprendizajes'
 import Alternativas from './views/Alternativas'
 import Guion from './views/Guion'
+import Memofichas from './views/Memofichas'
 
 export interface Vista {
   id: string
@@ -41,6 +42,7 @@ export const vistas: Vista[] = [
   { id: 'aprendizajes', ruta: '/aprendizajes', titulo: 'Aprendizajes', descripcion: 'Desafíos que tuvimos y qué aprendimos.', tipo: 'slide', componente: Aprendizajes },
   { id: 'alternativas', ruta: '/alternativas', titulo: 'Alternativas', descripcion: 'Decisiones tomadas y alternativas descartadas (respaldo para preguntas).', tipo: 'slide', componente: Alternativas },
   { id: 'guion', ruta: '/guion', titulo: 'Guion', descripcion: 'Guion de 10 minutos para dos voces, con las preguntas probables para los 5 minutos finales.', tipo: 'guion', componente: Guion },
+  { id: 'memofichas', ruta: '/memofichas', titulo: 'Memofichas', descripcion: 'Una ficha por pantalla para el celular en horizontal: captura, claves e idea final.', tipo: 'guion', componente: Memofichas },
 ]
 
 export const URL_BASE = 'https://sjunka.github.io/votaciones-cicd/'
