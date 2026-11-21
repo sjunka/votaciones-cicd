@@ -167,7 +167,7 @@ function Tablero({ data, ahora, elegido, setElegido, fijo, setFijo }: { data: Es
     <>
       <section className="pv-card flex flex-col gap-sm">
         <div className="flex flex-wrap gap-xs text-[13px]">
-          <span className="pv-chip">{pr ? `PR #${r.pr ?? ''}` : r.event}</span>
+          <span className="pv-chip">{pr ? (r.pr ? `PR #${r.pr}` : 'pull request') : r.event}</span>
           <span className="pv-chip">{r.branch}</span>
           <span className="pv-chip font-mono">{r.sha}</span>
         </div>

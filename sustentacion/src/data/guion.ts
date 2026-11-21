@@ -74,14 +74,15 @@ export const guion: Seccion[] = [
     quien: 'Sergio',
     ruta: '#/ramas?esc=pr&paso=3',
     captura: 'capturas/4-ramas.png',
-    tiempoSeg: 45,
+    tiempoSeg: 50,
     lineas: [
       a('Abrir Ramas, escenario Pull request. Pasos 1 a 4: la rama, el PR, el check y el ruleset.'),
       s('Usamos trunk-based: una rama main y ramas cortas feature/*. El ruleset proteger-main pide un pull request y que pase build-and-test.'),
       s('En el pull request solo corre build-and-test. No publica ni despliega.'),
       a('Cambiar al escenario Merge a main. Paso 4: la versión.'),
       s('Con el merge a main corre todo: publica las imágenes, despliega staging, espera la aprobación y despliega producción.'),
-      s('La versión es 1.0.N: el 1.0 sale del archivo VERSION y N es el número de ejecución. Cada imagen lleva también el SHA. Un cambio solo de documentación no dispara nada.'),
+      s('La versión es 1.0.N: el 1.0 sale del archivo VERSION y N es el número de ejecución. Cada imagen lleva también el SHA.'),
+      s('En resumen, tres eventos: pull request corre solo CI, push a main corre CI y CD, y workflow_dispatch es el disparo manual del rollback. Un cambio solo de documentación no dispara nada.'),
     ],
     preguntas: [
       {
@@ -100,17 +101,18 @@ export const guion: Seccion[] = [
     quien: 'Valeria',
     ruta: '#/pipeline?esc=normal&paso=1',
     captura: 'capturas/5-pipeline.png',
-    tiempoSeg: 65,
+    tiempoSeg: 75,
     lineas: [
       a('Abrir Pipeline, escenario Flujo normal. Pasos 1 a 4: build-and-test.'),
-      v('Este es ci-cd.yml, con los mismos nombres de job del Taller 3. build-and-test corre lint, gitleaks, terraform validate, las pruebas con 80 por ciento de cobertura y SonarCloud.'),
-      v('Después construye las dos imágenes, Trivy las escanea y solo en main las sube a Docker Hub.'),
+      v('Este es ci-cd.yml en GitHub Actions. Las herramientas: Docker, Terraform, SonarCloud, Trivy, gitleaks, pytest, Selenium y AWS.'),
+      v('El CI tiene sus cuatro etapas. Checkout del código. Test: lint, gitleaks, terraform validate, unitarias con 80 por ciento mínimo de cobertura y SonarCloud.'),
+      v('Build de las dos imágenes, que Trivy escanea. Y release: solo en main las sube a Docker Hub con la versión 1.0.N.'),
       a('Pasos 5 y 6: deploy-staging y test-staging.'),
-      v('deploy-staging llama a deploy.yml: terraform apply en el workspace staging y espera la versión nueva en /api/health. test-staging corre integración y Selenium.'),
+      v('Ahí empieza el CD. deploy-staging llama a deploy.yml: Terraform, que es la infraestructura como código, crea la red, el balanceador, ECS y DynamoDB, y despliega la app en staging. Espera la versión nueva en /api/health.'),
       a('Paso 7: señalar la aprobación manual.'),
       v('Aquí espera una persona. El ambiente production tiene revisores.'),
       a('Pasos 8 a 10: deploy-production, smoke y publish-release.'),
-      v('Producción repite el apply. Si las smoke pasan, publish-release crea la Release v1.0.N. Si fallan, entra el rollback, que le explica Sergio.'),
+      v('Producción repite el apply en su propio workspace: dos ambientes con la misma infraestructura. Si las smoke pasan, publish-release crea la Release v1.0.N. Si fallan, entra el rollback.'),
     ],
     preguntas: [
       {
@@ -129,7 +131,7 @@ export const guion: Seccion[] = [
     quien: 'Sergio',
     ruta: '#/arquitectura?esc=ambiente&paso=1',
     captura: 'capturas/7-arquitectura.png',
-    tiempoSeg: 50,
+    tiempoSeg: 45,
     lineas: [
       a('Abrir Arquitectura, escenario Ambiente. Pasos 1 a 4, de izquierda a derecha.'),
       s('Cada ambiente es igual. Entra un Application Load Balancer por el puerto 80. Una regla manda /api/* al target group de la API y lo demás al de la web.'),
@@ -156,13 +158,14 @@ export const guion: Seccion[] = [
     quien: 'Valeria',
     ruta: '#/pruebas',
     captura: 'capturas/8-pruebas.png',
-    tiempoSeg: 45,
+    tiempoSeg: 50,
     lineas: [
       a('Abrir Pruebas. Recorrer la tabla por la columna Dónde.'),
       v('Cada prueba corre en el lugar más barato donde puede fallar.'),
-      v('En CI van seis y ninguna toca AWS: lint, gitleaks, terraform validate, unitarias con moto, SonarCloud y Trivy.'),
-      v('En staging van dos, contra la API real y DynamoDB real: integración con pytest y el flujo completo con Selenium.'),
-      v('En producción solo corren las smoke, de solo lectura: la web carga, /api/health dice ok y la versión es la esperada. No ensucian datos reales.'),
+      v('Estáticas en CI: lint, gitleaks, terraform validate, SonarCloud y Trivy. Ninguna toca AWS.'),
+      v('Unitarias con pytest y moto, y Vitest en la web. El pipeline exige 80 por ciento de cobertura y SonarCloud marca 98,5.'),
+      v('Preproducción, en staging: integración con pytest y el flujo completo con Selenium, contra la API y DynamoDB reales.'),
+      v('Posproducción: las smoke, de solo lectura. La web carga, /api/health dice ok y la versión es la esperada.'),
     ],
     preguntas: [
       {
@@ -205,7 +208,7 @@ export const guion: Seccion[] = [
       },
       {
         pregunta: '¿Y si no hay una Release previa?',
-        respuesta: 'El rollback avisa y falla. Hoy hay tres Releases. Además, el circuit breaker de ECS vuelve a la tarea anterior si la nueva no arranca.',
+        respuesta: 'El rollback avisa y falla. Hoy hay cinco Releases. Además, el circuit breaker de ECS vuelve a la tarea anterior si la nueva no arranca.',
       },
       {
         pregunta: '¿El rollback revierte la infraestructura?',
@@ -259,13 +262,13 @@ export const guion: Seccion[] = [
     quien: 'Sergio',
     ruta: '#/evidencia',
     captura: 'capturas/12-demo.png',
-    tiempoSeg: 75,
+    tiempoSeg: 60,
     lineas: [
-      a('Orden de la demo. Producción: http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com. Staging: http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com. Encuesta de producción: /p/G8mR9uj4.'),
+      a('Orden de la demo. Producción: https://d1ypwe0ox2c5in.cloudfront.net. Staging: https://d1y5ajf6tjhnl7.cloudfront.net. Encuesta de producción: /p/G8mR9uj4.'),
       a('Paso 1: mostrar el QR de producción con la pregunta "¿GitHub Actions o CircleCI?".'),
       s('Escaneen el QR y voten. Los porcentajes se mueven cada dos segundos.'),
-      a('Paso 2: staging al lado de producción, los dos en la versión 1.0.12.'),
-      s('Staging tiene el banner amarillo y producción el verde. Los dos corren la misma versión.'),
+      a('Paso 2: staging al lado de producción, los dos en la versión 1.0.20.'),
+      s('La aplicación funciona en los dos ambientes. Staging tiene el banner amarillo y producción el verde, y los dos corren la misma versión, la 1.0.20.'),
       a('Paso 3 (opcional si hay tiempo): lanzar el botón de pánico en producción y mostrar el banner con la versión anterior. Tarda unos 4 minutos: mejor abrir el run 44344815777 ya hecho.'),
     ],
   },
