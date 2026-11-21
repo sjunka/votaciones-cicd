@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export function usePasos(total: number, ms = 4000) {
+export function usePasos(total: number, ms = 3000) {
   // #/ruta?paso=3 abre directo en ese paso (útil para enlazar o para capturas).
   const [i, setI] = useState(() => {
     const n = Number(new URLSearchParams(location.hash.split('?')[1] ?? '').get('paso'))

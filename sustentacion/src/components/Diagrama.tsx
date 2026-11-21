@@ -76,7 +76,7 @@ interface Props {
 }
 
 export default function Diagrama({ ancho, alto, nodos, aristas, pasos, ms }: Props) {
-  const dur = ms ?? 4000
+  const dur = ms ?? 3000
   const { i, playing, ir, toggle, sig, ant, reiniciar } = usePasos(pasos.length, dur)
   const fin = i >= pasos.length - 1
   const [sonido, setSonido] = useState(true)
