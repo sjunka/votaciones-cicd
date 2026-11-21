@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pipeline en vivo</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--tx:#e6edf3;--mut:#8b949e;--ok:#3fb950;--bad:#f85149;--run:#e3b341;--wait:#a371f7;--queue:#6e7681;--skip:#484f58;--cancel:#6e7681}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+.mono,.tm{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.ok{--c:var(--ok)}.bad{--c:var(--bad)}.run{--c:var(--run)}.wait{--c:var(--wait)}.queue{--c:var(--queue)}.skip{--c:var(--skip)}.cancel{--c:var(--cancel)}
+
+header{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;padding:16px 28px;border-bottom:1px solid var(--line)}
+.ttl{flex:1;min-width:260px}
+.ttl h1{margin:0;font-size:22px;font-weight:650}
+.meta{color:var(--mut);font-size:14px;margin-top:4px}
+.chip{display:inline-block;padding:1px 9px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--tx);margin-right:6px}
+.pick{font-size:13px;color:var(--mut);display:flex;flex-direction:column;gap:4px}
+select{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit;font-size:14px;max-width:340px}
+.total{text-align:right}.total .tm{font-size:38px;font-weight:700;line-height:1}.total .l{font-size:13px;color:var(--mut)}
+.err{margin:16px 28px 0;padding:10px 14px;border-radius:8px;background:rgba(248,81,73,.12);color:var(--bad)}
+
+.now{margin:20px 28px 0;padding:18px 22px;border-radius:10px;background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--c);display:flex;gap:6px 20px;align-items:center;flex-wrap:wrap}
+.now .txt{flex:1;min-width:240px}
+.now .k{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--c);font-weight:700}
+.now .v{font-size:28px;font-weight:650;line-height:1.2;margin:2px 0}
+.now .s{color:var(--mut);font-size:16px}
+.now .tm{font-size:34px;font-weight:700;color:var(--c)}
+.btn{display:inline-block;margin-top:8px;padding:6px 12px;border-radius:6px;background:var(--wait);color:#fff;font-weight:600}
+
+.lane h3{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin:22px 28px 10px;font-weight:600}
+.lane h3 b{color:var(--tx)}
+.flow{display:flex;align-items:center;overflow-x:auto;padding:2px 28px 4px}
+.card{position:relative;flex:1 1 0;min-width:150px;max-width:250px;background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:8px;padding:10px 12px 12px;cursor:pointer;overflow:hidden}
+.card .n{font-weight:600;font-size:15px}
+.card .st{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--c);margin-top:4px}
+.card.dim{opacity:.4}
+.card.sel{box-shadow:0 0 0 2px var(--tx)}
+.card.run{background:#1f1d16}
+.arrow{flex:0 0 26px;height:2px;background:var(--line)}
+.arrow.ok{background:var(--ok)}
+
+.prog{position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,transparent,var(--c),transparent) no-repeat;background-size:35% 100%;animation:slide 1.8s linear infinite}
+@keyframes slide{from{background-position:-60% 0}to{background-position:160% 0}}
+@media (prefers-reduced-motion:reduce){.prog{animation:none;background:var(--c)}}
+
+.detail{margin:22px 28px 28px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.detail .hd{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline;padding:14px 18px;border-bottom:1px solid var(--line)}
+.detail h2{margin:0;font-size:19px}
+.detail .hd .mut{color:var(--mut);font-size:14px}
+.detail .hd .sp{flex:1}
+.steps{list-style:none;margin:0;padding:6px 8px;columns:2 420px;column-gap:16px}
+.step{position:relative;display:flex;gap:10px;align-items:center;padding:6px 10px;border-radius:6px;break-inside:avoid;overflow:hidden}
+.step .ic{width:18px;text-align:center;color:var(--c);flex:none}
+.step .nm{flex:1}
+.step .tm{color:var(--mut);font-size:14px}
+.step.ok .nm{color:var(--mut)}
+.step.queue,.step.skip{opacity:.45}
+.step.run{background:rgba(227,179,65,.12)}.step.run .nm{font-weight:650}.step.run .tm{color:var(--run)}
+.step.bad{background:rgba(248,81,73,.14)}.step.bad .nm{font-weight:650}
+.empty{padding:14px 10px;color:var(--mut)}
+@media(max-width:700px){header,.flow{padding-left:16px;padding-right:16px}.now,.detail{margin-left:16px;margin-right:16px}.lane h3{margin-left:16px}}
+</style></head><body>
+<header>
+ <div class="ttl"><h1 id="h1">Conectando con GitHub…</h1><div class="meta" id="meta"></div></div>
+ <label class="pick">Run a mostrar<select id="runs"></select></label>
+ <div class="total"><div id="total" class="tm">—</div><div class="l">duración total</div></div>
+</header>
+<div id="err" class="err" hidden></div>
+<div id="app"></div>
+<script>
+// Orden fijo del ci-cd.yml: así el grafo completo se ve desde el primer segundo.
+const LANES=[
+ {title:'Pipeline principal',jobs:['build-and-test','deploy-staging','test-staging','deploy-production','smoke-test-production','publish-release']},
+ {title:'Rollback automático',note:'solo si falla producción',jobs:['find-rollback-release','rollback-production','smoke-test-rollback','notify-rollback']},
+ {title:'Aviso de falla',note:'solo si falla antes de producción',jobs:['notify-failure']},
+];
+const NAMES={'build-and-test':'Build y pruebas','deploy-staging':'Deploy staging','test-staging':'Pruebas en staging','deploy-production':'Deploy producción','smoke-test-production':'Smoke test producción','publish-release':'Publicar release','find-rollback-release':'Buscar versión estable','rollback-production':'Rollback producción','smoke-test-rollback':'Smoke test rollback','notify-rollback':'Aviso de rollback','notify-failure':'Aviso a Discord'};
+const TXT={ok:'Exitoso',bad:'Falló',run:'En curso',wait:'Esperando aprobación',queue:'En cola',skip:'Omitido',cancel:'Cancelado'};
+const ICON={ok:'✓',bad:'✕',run:'●',wait:'⏸',queue:'○',skip:'–',cancel:'⊘'};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const base=n=>n.split(' / ')[0];
+const nice=n=>NAMES[base(n)]||n;
+const st=x=>x.status==='completed'?({success:'ok',failure:'bad',timed_out:'bad',cancelled:'cancel'}[x.conclusion]||'skip')
+ :x.status==='in_progress'?'run':x.status==='waiting'?'wait':'queue';
+const ms=iso=>Date.parse(iso);
+const fmt=d=>{const s=Math.max(0,Math.round(d/1e3)),h=Math.floor(s/3600),m=Math.floor(s/60)%60,ss=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${ss}`:`${m}:${ss}`};
+// Los timers se pintan en tick(); el HTML no cambia cada segundo y nada parpadea.
+const timer=(s,e)=>s?`<span class="tm" data-s="${s}" data-e="${e||''}"></span>`:'<span class="tm">—</span>';
+let S=null,skew=0,pick=null,lastHtml='',lastRuns='';
+let pinned=new URLSearchParams(location.search).get('run')||'';
+
+async function poll(){
+ try{
+  const r=await fetch('/api/state'+(pinned?'?run='+pinned:''));const j=await r.json();
+  if(j.error)throw new Error(j.error);
+  skew=j.now-Date.now();
+  if(S&&S.run.id!==j.run.id)pick=null; // run nuevo: volver a seguir el foco en vivo
+  S=j;$('#err').hidden=true;render();
+ }catch(e){$('#err').hidden=false;$('#err').textContent='Sin datos de GitHub: '+e.message}
+}
+
+function render(){
+ const r=S.run,pr=r.event==='pull_request',done=r.status==='completed';
+ const byBase=new Map(S.jobs.map(j=>[base(j.name),j]));
+ const known=new Set(LANES.flatMap(l=>l.jobs));
+ const lanes=LANES.map(l=>({...l,items:l.jobs.map(b=>byBase.get(b)||{name:b,ghost:true,status:done?'completed':'queued',conclusion:done?'skipped':null,steps:[]})}));
+ const extra=S.jobs.filter(j=>!known.has(base(j.name)));
+ if(extra.length)lanes.push({title:'Otros jobs',items:extra});
+ const all=lanes.flatMap(l=>l.items);
+ const live=all.find(j=>['run','wait'].includes(st(j)))||all.find(j=>st(j)==='bad')
+  ||(!done&&all.find(j=>!j.ghost&&st(j)==='queue'))||[...all].reverse().find(j=>st(j)==='ok')||all[0];
+ const shown=(pick&&all.find(j=>j.name===pick))||live;
+ const skipTxt=li=>pr?'Solo en main':li>0?'No hizo falta':'Omitido';
+
+ // Banner "qué pasa ahora"
+ const lc=st(live),cur=live.steps.find(s=>s.status==='in_progress'),idx=live.steps.indexOf(cur)+1;
+ let b;
+ if(!done&&lc==='run')b={c:'run',k:'Ejecutando ahora',v:nice(live.name)+(cur?' › '+cur.name:''),s:cur?`Paso ${idx} de ${live.steps.length}`:'Preparando el job',t:timer(cur?.started||live.started)};
+ else if(!done&&lc==='wait')b={c:'wait',k:'Esperando aprobación manual',v:nice(live.name),s:'Un revisor del environment debe aprobar el despliegue',t:timer(live.started),x:`<a class="btn" href="${r.url}" target="_blank">Aprobar en GitHub ↗</a>`};
+ else if(!done)b={c:'queue',k:'En cola',v:nice(live.name),s:'Esperando un runner disponible',t:''};
+ else if(r.conclusion==='success'){const n=all.filter(j=>st(j)==='ok').length;
+  b={c:'ok',k:'Pipeline exitoso',v:pr?'Build y pruebas en verde: listo para merge':'Desplegado en staging y producción',s:`${n} ${n===1?'job':'jobs'} en verde`,t:timer(r.started,r.updated)};}
+ else{const fj=all.find(j=>st(j)==='bad')||live,fs=fj.steps.find(s=>st(s)==='bad');
+  b={c:st(r)==='cancel'?'cancel':'bad',k:st(r)==='cancel'?'Pipeline cancelado':'Pipeline falló',v:nice(fj.name)+(fs?' › '+fs.name:''),s:'Revisa los logs del paso en rojo',t:timer(r.started,r.updated),x:`<a href="${fj.url||r.url}" target="_blank">Ver logs ↗</a>`};}
+ const mainLane=lanes[0].items,stage=mainLane.filter(j=>st(j)==='ok').length;
+
+ const head=`<h1>${r.pr?`PR #${r.pr} · `:''}${esc(r.title)}</h1><div class="meta"><span class="chip">${pr?'pull_request':esc(r.event)}</span><span class="chip">${esc(r.branch)}</span><span class="chip mono">${r.sha}</span>${esc(r.actor)} · <a href="${r.url}" target="_blank">abrir en GitHub ↗</a></div>`;
+ const banner=`<section class="now ${b.c}"><div class="txt"><div class="k">${b.k}</div><div class="v">${esc(b.v)}</div><div class="s">${b.s}</div>${b.x||''}</div>${b.t}</section>`;
+ const lanesHtml=lanes.map((l,li)=>{
+  const used=l.items.some(j=>!['skip','queue'].includes(st(j))||(!j.ghost&&!pr));
+  return `<div class="lane"><h3><b>${l.title}</b>${l.note?' · '+l.note:''}${li===0?` · ${stage} de ${mainLane.length} etapas`:''}</h3><div class="flow">`+
+  l.items.map((j,i)=>{const c=st(j),dim=c==='skip'||(j.ghost&&c==='queue'),txt=dim?skipTxt(li):TXT[c],prev=l.items[i-1];
+   return (i?`<div class="arrow ${prev&&st(prev)==='ok'?'ok':''}"></div>`:'')+
+   `<div class="card ${c}${dim?' dim':''}${j===shown?' sel':''}" data-job="${esc(j.name)}"><div class="n">${esc(nice(j.name))}</div><div class="st"><span>${ICON[c]} ${txt}</span>${['run','wait','ok','bad'].includes(c)?timer(j.started,j.completed):''}</div>${c==='run'?'<div class="prog"></div>':''}</div>`;
+  }).join('')+`</div></div>`;}).join('');
+ const dc=st(shown),nd=shown.steps.filter(s=>s.status==='completed').length;
+ const detail=`<section class="detail ${dc}"><div class="hd"><h2 style="color:var(--c)">${ICON[dc]}</h2><h2>${esc(nice(shown.name))}</h2><span class="chip">${TXT[dc]}</span><span class="mut">${nd} de ${shown.steps.length} pasos</span><span class="sp"></span>${pick?'<a href="#" data-follow>← seguir en vivo</a>':''}${shown.url?`<a href="${shown.url}" target="_blank">logs ↗</a>`:''}</div><ol class="steps">`+
+  (shown.steps.map((s,i)=>{const c=st(s);return `<li class="step ${c}"><span class="ic">${ICON[c]}</span><span class="nm">${i+1}. ${esc(s.name)}</span>${c==='skip'||c==='queue'?'<span class="tm">—</span>':timer(s.started,s.completed)}${c==='run'?'<div class="prog"></div>':''}</li>`}).join('')
+   ||`<li class="empty">${shown.ghost?(pr?'Este job solo corre al hacer merge a main.':'Este job no se ejecutó en este run.'):'El job todavía no empieza.'}</li>`)+`</ol></section>`;
+
+ const html=head+banner+lanesHtml+detail+timer(r.started,done?r.updated:'');
+ if(html!==lastHtml){ // solo se toca el DOM si cambió el estado
+  lastHtml=html;$('.ttl').innerHTML=head;$('#app').innerHTML=banner+lanesHtml+detail;$('#total').outerHTML=`<div id="total">${timer(r.started,done?r.updated:'')}</div>`;
+ }
+ const runsHtml=`<option value="">Seguir el más reciente (auto)</option>`+S.runs.map(x=>`<option value="${x.id}">${ICON[st(x)]} ${x.event==='pull_request'?'PR':x.event} · ${esc(x.branch)} · ${esc(x.title.slice(0,38))}</option>`).join('');
+ if(runsHtml!==lastRuns){lastRuns=runsHtml;$('#runs').innerHTML=runsHtml}
+ $('#runs').value=pinned;
+ tick();
+}
+function tick(){const n=Date.now()+skew;document.querySelectorAll('.tm[data-s]').forEach(el=>{el.textContent=fmt((el.dataset.e?ms(el.dataset.e):n)-ms(el.dataset.s))})}
+
+document.addEventListener('click',e=>{
+ if(e.target.closest('[data-follow]')){e.preventDefault();pick=null;render();return}
+ const c=e.target.closest('[data-job]');if(c){pick=c.dataset.job;render()}
+});
+$('#runs').addEventListener('change',e=>{pinned=e.target.value;pick=null;lastHtml='';history.replaceState(null,'',pinned?'?run='+pinned:location.pathname);poll()});
+poll();setInterval(poll,3000);setInterval(tick,1000);
+</script></body></html>
