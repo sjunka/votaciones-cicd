@@ -33,7 +33,7 @@ export const criterios: Criterio[] = [
   { n: 9, seccion: 8, criterio: 'Muestra ejecución exitosa de pipelines y logs en GitHub Actions', pantalla: 'Evidencia', captura: 'capturas/11-evidencia.png',
     respuesta: ['Run 44348025068: todo verde', 'Run 44340166676: rollback automático', 'Run 44840313582: v1.0.20 + Discord'] },
   { n: 11, seccion: 9, criterio: 'Demuestra aplicación funcional en todos los ambientes', pantalla: 'Demo', captura: 'capturas/12-demo.png',
-    respuesta: ['Staging (amarillo) y producción (verde)', 'Los dos en 1.0.20', 'QR de producción: /p/G8mR9uj4'] },
+    respuesta: ['Staging (amarillo) y producción (verde)', 'Los dos en 1.0.27', 'QR de producción: /p/G8mR9uj4'] },
   { n: 13, seccion: 10, criterio: 'Socializa desafíos, decisiones y aprendizajes', pantalla: 'Aprendizajes', captura: 'capturas/13-aprendizajes.png',
     respuesta: ['crypto.randomUUID falla por HTTP', 'always() para que corra el rollback', 'Aprobación protege avance, no regreso', 'AWS personal: se destruye al terminar'] },
   { n: 14, seccion: 11, criterio: 'Respuestas técnicas durante preguntas del jurado', pantalla: 'Preguntas', captura: 'capturas/14-cierre.png',
