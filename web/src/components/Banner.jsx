@@ -11,6 +11,8 @@ export default function Banner() {
   }, []);
   const env = health?.environment ?? "...";
   const cls = env in LABELS ? env : "other";
+  // Cada parche gira el tono 137 grados: versiones seguidas nunca comparten color
+  const patch = Number(health?.version?.split(".").pop()) || 0;
   return (
     <header className={`banner ${cls}`} data-testid="env-banner">
       <div className="banner-inner">
@@ -23,7 +25,8 @@ export default function Banner() {
           Votaciones
         </Link>
         <span className="env">{LABELS[env] ?? env.toUpperCase()}</span>
-        <Link to="/acerca" className="version" data-testid="version">
+        <Link to="/acerca" className="version" data-testid="version"
+          style={{ background: `hsl(${(patch * 137) % 360} 75% 42%)` }}>
           {health?.version ? `v${health.version}` : ""}
         </Link>
       </div>
