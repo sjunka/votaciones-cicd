@@ -2,8 +2,8 @@
 
 Autor: Sergio Junca. Estado al 2026-11-18: corre en AWS (cuenta personal 278835524469, us-east-1). Staging y producción están en la versión 1.0.8 (commit c5a00d4).
 
-- Staging: http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com
-- Producción: http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com
+- Staging: https://d1y5ajf6tjhnl7.cloudfront.net
+- Producción: https://d1ypwe0ox2c5in.cloudfront.net
 - Corren 2 ALB y 4 servicios ECS Fargate (unos US$3 al día).
 
 ## Vista general

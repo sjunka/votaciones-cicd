@@ -4,8 +4,8 @@
  * Cuando haya el dato real, se escribe aquí y no se toca nada más.
  */
 export const URL_REPO_EQUIPO: string | null = 'https://github.com/sjunka/votaciones-cicd'
-export const URL_STAGING: string | null = 'http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com'
-export const URL_PRODUCCION: string | null = 'http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com'
+export const URL_STAGING: string | null = 'https://d1y5ajf6tjhnl7.cloudfront.net'
+export const URL_PRODUCCION: string | null = 'https://d1ypwe0ox2c5in.cloudfront.net'
 export const URL_DOCKERHUB: string | null = 'https://hub.docker.com/r/sjunka/votaciones-api'
 export const URL_SONARCLOUD: string | null = 'https://sonarcloud.io/project/overview?id=sjunka_votaciones-cicd'
 export const URL_RUN_EXITOSO: string | null = 'https://github.com/sjunka/votaciones-cicd/actions/runs/44348025068'
