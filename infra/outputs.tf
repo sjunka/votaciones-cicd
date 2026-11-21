@@ -1,7 +1,7 @@
 # infra/outputs.tf
 output "alb_url" {
-  description = "URL pública del Application Load Balancer"
-  value       = "http://${aws_lb.main.dns_name}"
+  description = "URL pública con HTTPS (CloudFront delante del ALB)"
+  value       = "https://${aws_cloudfront_distribution.main.domain_name}"
 }
 
 output "ecs_cluster_name" {
