@@ -76,7 +76,9 @@ interface Props {
 }
 
 export default function Diagrama({ ancho, alto, nodos, aristas, pasos, ms }: Props) {
-  const { i, playing, ir, toggle, sig, ant, reiniciar } = usePasos(pasos.length, ms)
+  const dur = ms ?? 4000
+  const { i, playing, ir, toggle, sig, ant, reiniciar } = usePasos(pasos.length, dur)
+  const fin = i >= pasos.length - 1
   const [sonido, setSonido] = useState(true)
   const paso = pasos[i]
   const color = colorDe(paso, i)
@@ -120,12 +122,17 @@ export default function Diagrama({ ancho, alto, nodos, aristas, pasos, ms }: Pro
   return (
     <div ref={raiz} className="scroll-mt-2">
       <div className="-mx-1 mb-sm flex flex-wrap items-center gap-xs bg-canvas/95 px-1 py-sm backdrop-blur">
-        <Boton onClick={() => { verEscenario(); toggle() }} primario>{playing ? 'Pausa' : i >= pasos.length - 1 ? 'Repetir' : 'Reproducir'}</Boton>
-        <Boton onClick={ant} desactivado={i === 0}>Anterior</Boton>
-        <Boton onClick={sig} desactivado={i >= pasos.length - 1}>Siguiente</Boton>
+        <Boton onClick={() => { verEscenario(); toggle() }} primario>{playing ? '❚❚ Pausa' : fin ? '↻ Repetir' : '▶ Reproducir'}</Boton>
+        <Boton onClick={ant} desactivado={i === 0}>← Anterior</Boton>
+        <Boton onClick={sig} desactivado={fin} primario={!playing && !fin}>Siguiente →</Boton>
         <Boton onClick={reiniciar}>Reiniciar</Boton>
         <Boton onClick={() => setSonido(!sonido)}>Sonido: {sonido ? 'sí' : 'no'}</Boton>
-        <span className="ml-auto text-[15px] font-medium text-ink">Paso {i + 1} de {pasos.length}</span>
+        <span className="ml-auto text-[15px] font-medium text-ink">{fin ? '✓ Fin · ' : ''}Paso {i + 1} de {pasos.length}</span>
+        {/* Barra: cuánto falta para el siguiente paso cuando se reproduce. */}
+        <div className="h-1 w-full overflow-hidden rounded bg-hairline">
+          {playing && !fin && <div key={i} className="barra h-full bg-primary" style={{ animationDuration: `${dur}ms` }} />}
+          {fin && <div className="h-full w-full" style={{ background: "var(--success)" }} />}
+        </div>
       </div>
 
       <div className="grid gap-md md:grid-cols-[minmax(0,1fr)_320px] md:items-start xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -151,11 +158,11 @@ export default function Diagrama({ ancho, alto, nodos, aristas, pasos, ms }: Pro
           const ancho_et = e.etiqueta ? e.etiqueta.length * 7.8 + 14 : 0
           return (
             <g key={e.id} opacity={apagada ? 0.25 : 1}>
-              <path d={d(pts)} fill="none" stroke={c} strokeWidth={activa ? 4 : 2.5} strokeLinejoin="round" className={activa ? 'flujo' : 'flujo-lento'} opacity={activa ? 1 : 0.7} />
-              <polygon points={flecha(pts)} fill={c} />
+              <path key={activa ? `a${i}` : 'q'} d={d(pts)} fill="none" stroke={c} strokeWidth={activa ? 4 : 2.5} strokeLinejoin="round" pathLength={activa ? 1 : undefined} className={activa ? 'traza' : ''} opacity={activa ? 1 : 0.7} />
+              <polygon key={activa ? `p${i}` : 'qp'} points={flecha(pts)} fill={c} className={activa ? 'punta' : ''} />
               {activa && (
-                <circle r={6} fill={color}>
-                  <animateMotion dur="1.8s" repeatCount="indefinite" path={d(pts)} />
+                <circle key={`c${i}`} r={6} fill={color}>
+                  <animateMotion dur="0.6s" repeatCount="1" fill="freeze" path={d(pts)} />
                 </circle>
               )}
               {e.etiqueta && (

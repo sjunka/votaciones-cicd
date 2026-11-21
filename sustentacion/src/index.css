@@ -63,8 +63,14 @@ h1, h2, h3 { font-family: var(--font-serif); color: var(--ink); font-weight: 400
 .flujo-lento { stroke-dasharray: 3 7; animation: flujo 2.4s linear infinite; }
 .pulso { animation: pulso 1.6s ease-in-out infinite; }
 .latido { animation: latido 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes traza { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes punta { 0% { opacity: 0; transform: scale(.4); } 70% { opacity: 1; transform: scale(1.5); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes barra { from { width: 0; } to { width: 100%; } }
+.traza { stroke-dasharray: 1; animation: traza .6s ease-out both; }
+.punta { animation: punta .35s ease-out .55s both; transform-box: fill-box; transform-origin: center; }
+.barra { animation: barra linear both; }
 @media (prefers-reduced-motion: reduce) {
-  .flujo, .flujo-lento, .pulso, .latido { animation: none; }
+  .flujo, .flujo-lento, .pulso, .latido, .traza, .punta, .barra { animation: none; }
 }
 
 /* Pipeline en vivo: tablero oscuro tipo consola DevOps (paleta de ui-ux-pro-max: slate + verde de estado) */
