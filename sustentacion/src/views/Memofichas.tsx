@@ -1,15 +1,34 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { colorQuien, fmtTiempo, guion } from '../data/guion'
+import { criterios } from '../data/criterios'
 
 const base = import.meta.env.BASE_URL
+const colorRubrica = '#cc785c'
+
+interface Ficha { titulo: string; captura: string; clave: string[]; idea: string; etiqueta: string; color: string; meta: string }
+
+const mazos: Record<'guion' | 'rubrica', Ficha[]> = {
+  guion: guion.map((s, i) => ({
+    titulo: s.titulo, captura: s.captura, clave: s.ficha.clave, idea: s.ficha.idea,
+    etiqueta: s.quien, color: colorQuien[s.quien],
+    meta: `empieza en ${fmtTiempo(guion.slice(0, i).reduce((t, g) => t + g.tiempoSeg, 0))} · dura ${fmtTiempo(s.tiempoSeg)}`,
+  })),
+  rubrica: criterios.map((c, i) => ({
+    titulo: `${i + 1}. ${c.criterio}`, captura: c.captura, clave: c.respuesta, idea: `Se muestra en: ${c.pantalla}`,
+    etiqueta: 'Rúbrica', color: colorRubrica, meta: 'repaso para el jurado',
+  })),
+}
 
 // Memofichas para el celular en horizontal: cubren toda la pantalla (tapan la barra de navegación).
-// Pasar: deslizar, tocar la mitad derecha o izquierda, o flechas del teclado.
+// Pasar: deslizar, tocar la mitad derecha o izquierda, o flechas del teclado. El botón flotante cambia de mazo.
 export default function Memofichas() {
-  const [i, setI] = useState(0)
+  const [mazo, setMazo] = useState<'guion' | 'rubrica'>('guion')
+  const [pos, setPos] = useState({ guion: 0, rubrica: 0 })
   const x0 = useRef<number | null>(null)
-  const ir = (d: number) => setI((n) => Math.min(guion.length - 1, Math.max(0, n + d)))
+  const fichas = mazos[mazo]
+  const i = pos[mazo]
+  const ir = (d: number) => setPos((p) => ({ ...p, [mazo]: Math.min(fichas.length - 1, Math.max(0, p[mazo] + d)) }))
 
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
@@ -18,11 +37,10 @@ export default function Memofichas() {
     }
     window.addEventListener('keydown', tecla)
     return () => window.removeEventListener('keydown', tecla)
-  }, [])
+  })
 
-  const s = guion[i]
-  const color = colorQuien[s.quien]
-  const acumulado = guion.slice(0, i).reduce((t, g) => t + g.tiempoSeg, 0)
+  const f = fichas[i]
+  const parar = (e: React.TouchEvent) => e.stopPropagation()
 
   return (
     <div
@@ -37,34 +55,44 @@ export default function Memofichas() {
       }}
     >
       <div className="flex items-center gap-sm px-sm pt-xs text-[13px]">
-        <span className="rounded-sm px-xs font-semibold text-white" style={{ background: color }}>{s.quien}</span>
-        <span className="font-mono text-muted">{i + 1}/{guion.length}</span>
-        <span className="font-mono text-muted">empieza en {fmtTiempo(acumulado)} · dura {fmtTiempo(s.tiempoSeg)}</span>
-        <Link to="/guion" className="ml-auto text-muted underline" onTouchEnd={(e) => e.stopPropagation()}>salir</Link>
+        <span className="rounded-sm px-xs font-semibold text-white" style={{ background: f.color }}>{f.etiqueta}</span>
+        <span className="font-mono text-muted">{i + 1}/{fichas.length}</span>
+        <span className="font-mono text-muted">{f.meta}</span>
+        <Link to="/guion" className="ml-auto text-muted underline" onTouchStart={parar} onTouchEnd={parar}>salir</Link>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-sm p-sm landscape:flex-row">
         <img
-          src={base + s.captura}
-          alt={`Pantalla: ${s.titulo}`}
+          src={base + f.captura}
+          alt={`Pantalla: ${f.titulo}`}
           className="max-h-[35vh] w-auto self-start rounded-md border border-hairline object-contain landscape:max-h-full landscape:w-[38%]"
         />
         <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="font-serif text-[22px] leading-tight" style={{ color }}>{s.titulo}</h1>
+          <h1 className="font-serif text-[22px] leading-tight" style={{ color: f.color }}>{f.titulo}</h1>
           <ul className="mt-xs list-disc space-y-[2px] pl-md text-[16px] leading-snug text-body">
-            {s.ficha.clave.map((c) => <li key={c}>{c}</li>)}
+            {f.clave.map((c) => <li key={c}>{c}</li>)}
           </ul>
-          <p className="mt-auto rounded-md border-l-4 bg-card px-sm py-xs text-[16px] font-semibold" style={{ borderColor: color }}>
-            {s.ficha.idea}
+          <p className="mt-auto mr-[96px] rounded-md border-l-4 bg-card px-sm py-xs text-[16px] font-semibold" style={{ borderColor: f.color }}>
+            {f.idea}
           </p>
         </div>
       </div>
 
       <div className="flex gap-[3px] px-sm pb-xs">
-        {guion.map((g, n) => (
-          <span key={n} className="h-[4px] flex-1 rounded-full" style={{ background: n <= i ? colorQuien[g.quien] : 'var(--hairline)' }} />
+        {fichas.map((g, n) => (
+          <span key={n} className="h-[4px] flex-1 rounded-full" style={{ background: n <= i ? g.color : 'var(--hairline)' }} />
         ))}
       </div>
+
+      <button
+        onClick={() => setMazo(mazo === 'guion' ? 'rubrica' : 'guion')}
+        onTouchStart={parar}
+        onTouchEnd={parar}
+        className="fixed bottom-[18px] right-[14px] rounded-full px-md py-sm text-[14px] font-semibold text-white shadow-lg"
+        style={{ background: mazo === 'guion' ? colorRubrica : '#2f6fe4' }}
+      >
+        {mazo === 'guion' ? 'Ver 14 criterios' : 'Ver guion'}
+      </button>
     </div>
   )
 }
