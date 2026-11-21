@@ -18,7 +18,7 @@ Exposición: 10 minutos más 5 de preguntas. El guion suma 9:10 (vista Guion de 
 | 8 | Pruebas estáticas, unitarias, cobertura, pre y post prod | Sí | Vista Pruebas, Sonar 98,5 % |
 | 9 | Pipelines en verde con logs | Sí | Runs 44809582134 y 44348025068 |
 | 10 | Evidencia de las 3 mejoras | Sí | Vista Modificaciones |
-| 11 | App funcional en todos los ambientes | Sí | Staging y producción en v1.0.18 |
+| 11 | App funcional en todos los ambientes | Sí | Staging y producción en v1.0.20 |
 | 12 | Rollback automático y manual | Sí | Runs 44340166676 y 44344815777 |
 | 13 | Desafíos, decisiones y aprendizajes | Sí | Vistas Aprendizajes y Alternativas |
 | 14 | Respuestas técnicas al jurado | Preparado | Vista Alternativas y hoja de respuestas |
@@ -35,7 +35,7 @@ Exposición: 10 minutos más 5 de preguntas. El guion suma 9:10 (vista Guion de 
 | 6 | Pruebas: ambiente, qué valida y por qué | Sí | Vista Pruebas |
 | 7 | Evidencia de pipelines exitosos en GitHub Actions | Sí | Runs 44348025068 y 44340166676 (vista Evidencia) |
 | 8 | Evidencia de las 3 modificaciones | Sí | Vista Modificaciones: DevSecOps, SemVer con Releases y `deploy.yml` reutilizable |
-| 9 | App funcional en cada ambiente | Sí | Staging y producción en la v1.0.18 (vista Evidencia y demo) |
+| 9 | App funcional en cada ambiente | Sí | Staging y producción en la v1.0.20 (vista Evidencia y demo) |
 | 10 | Desafíos y aprendizajes | Sí | Vista Aprendizajes |
 
 ## Mínimo del pipeline
@@ -56,7 +56,7 @@ Exposición: 10 minutos más 5 de preguntas. El guion suma 9:10 (vista Guion de 
 
 ## Riesgos que quedan
 
-- Discord: implementado, sin webhook, sin mensajes. No cuenta entre las 3 modificaciones.
+- Discord: activo (webhook en #general, aviso de la v1.0.20 en el run 44840313582). No cuenta entre las 3 modificaciones.
 - Falta confirmar con el profe que `deploy.yml`, DevSecOps y SemVer valen como modificaciones, y que web + API + DynamoDB vale como complejidad media.
 - Reparto del guion entre Sergio y Valeria: propuesta sin confirmar.
 - SonarCloud general con Security D (46 issues, casi todos de los workflows). El quality gate pasa.

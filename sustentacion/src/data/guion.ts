@@ -1,7 +1,6 @@
 // Guion de la sustentación del proyecto final. Una sección por pantalla, con su captura.
 // Línea con `dice`: lo que se dice en voz alta. Línea con `accion`: qué mostrar o qué clic hacer.
 // Los pasos "Paso N" salen de src/data/{ramas,pipeline,arquitectura,rollback}.ts.
-// El reparto entre expositores es una propuesta, falta confirmar.
 export type Quien = 'Sergio' | 'Valeria'
 export type Vista = 'intro' | 'resumen' | 'artefacto' | 'ramas' | 'pipeline' | 'arquitectura' | 'pruebas' | 'rollback' | 'modificaciones' | 'evidencia' | 'aprendizajes' | 'cierre'
 
@@ -225,9 +224,9 @@ export const guion: Seccion[] = [
       a('Abrir Modificaciones. Una tarjeta por modificación, con su enlace.'),
       v('Tres modificaciones frente al Taller 3. El rollback y el botón de pánico son mínimos del enunciado, no los contamos.'),
       v('Una, DevSecOps: gitleaks busca secretos en el código y el historial, y Trivy escanea las dos imágenes. Los dos corren en build-and-test.'),
-      v('Dos, versionado SemVer: cada versión que pasa producción queda como Release v1.0.N. Hoy hay cuatro.'),
+      v('Dos, versionado SemVer: cada versión que pasa producción queda como Release v1.0.N. Hoy hay cinco.'),
       v('Tres, un workflow reutilizable: deploy.yml lo usan staging, producción, el rollback automático y el botón de pánico.'),
-      v('Además la arquitectura es nueva: dos servicios con una regla del balanceador y DynamoDB. Y dejamos avisos a Discord implementados, a la espera del webhook.'),
+      v('Además la arquitectura es nueva: dos servicios con una regla del balanceador y DynamoDB. Y como extra, avisos a Discord: cada despliegue, falla o rollback llega al canal.'),
     ],
     preguntas: [
       {
@@ -236,7 +235,7 @@ export const guion: Seccion[] = [
       },
       {
         pregunta: '¿Y los avisos a Discord?',
-        respuesta: 'Los jobs notify-failure, notify-rollback y notify están implementados y no fallan sin webhook. Falta crear el webhook, así que todavía no hay mensajes que mostrar. No los contamos entre las tres.',
+        respuesta: 'Los jobs notify-failure, notify-rollback y notify publican en el canal #general por un webhook guardado como secreto de GitHub. Si el secreto falta, el paso no falla. Son un extra, no los contamos entre las tres.',
       },
     ],
   },

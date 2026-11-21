@@ -54,7 +54,7 @@ export default function Rubrica() {
       <h2 className="mt-xl text-[28px]">Mínimos del pipeline</h2>
       <div className="mt-sm"><Lista filas={minimos} /></div>
       <p className="mt-md text-[16px] text-muted">
-        "Listo en la app" significa que la vista está hecha. Lo único sin evidencia son los mensajes de Discord, que no cuentan entre las tres modificaciones.
+        "Listo en la app" significa que la vista está hecha. Toda la evidencia está cargada. Discord es un extra y no cuenta entre las tres modificaciones.
       </p>
     </Slide>
   )

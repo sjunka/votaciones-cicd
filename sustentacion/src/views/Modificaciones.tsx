@@ -13,7 +13,7 @@ const mods = [
     n: 2,
     t: 'Versionado SemVer y GitHub Releases',
     cambia: 'Cada versión que pasa producción queda como Release v1.0.N con notas automáticas. El rollback vuelve a esas Releases.',
-    evidencia: 'Releases v1.0.3, v1.0.8, v1.0.12 y v1.0.18, y la versión en el banner de la app y en /api/health.',
+    evidencia: 'Releases v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20, y la versión en el banner de la app y en /api/health.',
     url: 'https://github.com/sjunka/votaciones-cicd/releases',
     color: 'var(--s3)',
   },
@@ -29,7 +29,7 @@ const mods = [
 
 const extras = [
   'Arquitectura nueva frente al Taller 3: dos servicios ECS detrás de un balanceador con regla /api/* y una tabla de DynamoDB.',
-  'Avisos a Discord (notify-failure, notify-rollback, notify): implementados y sin fallar si falta el webhook. Todavía no hay mensajes que mostrar.',
+  'Avisos a Discord (notify-failure, notify-rollback, notify): funcionando: el run 44840313582 publicó en #general el aviso de la v1.0.20.',
 ]
 
 export default function Modificaciones() {
