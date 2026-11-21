@@ -25,7 +25,7 @@ export interface Vista {
 
 /** Registro de vistas. La barra de navegación, las rutas y la página Info salen de aquí. */
 export const vistas: Vista[] = [
-  { id: 'info', ruta: '/', titulo: 'Inicio', descripcion: 'Equipo, enlaces a cada vista y datos pendientes.', tipo: 'slide', componente: Info },
+  { id: 'info', ruta: '/', titulo: 'Inicio', descripcion: 'Equipo, enlaces a cada vista y a la evidencia.', tipo: 'slide', componente: Info },
   { id: 'resumen', ruta: '/resumen', titulo: 'Resumen', descripcion: 'Resumen ejecutivo: qué construimos y cómo evolucionó desde los talleres 1 a 3.', tipo: 'slide', componente: Resumen },
   { id: 'rubrica', ruta: '/rubrica', titulo: 'Rúbrica', descripcion: 'Los 10 puntos de la presentación y los mínimos del pipeline, con la vista que cubre cada uno.', tipo: 'slide', componente: Rubrica },
   { id: 'artefacto', ruta: '/artefacto', titulo: 'Artefacto', descripcion: 'La app de votación en vivo: propósito, funcionalidades y complejidad.', tipo: 'slide', componente: Artefacto },
@@ -35,7 +35,7 @@ export const vistas: Vista[] = [
   { id: 'pruebas', ruta: '/pruebas', titulo: 'Pruebas', descripcion: 'Qué prueba cada suite, en qué ambiente y por qué.', tipo: 'slide', componente: Pruebas },
   { id: 'rollback', ruta: '/rollback', titulo: 'Rollback', descripcion: 'Rollback automático y botón de pánico.', tipo: 'diagrama', componente: Rollback },
   { id: 'modificaciones', ruta: '/modificaciones', titulo: 'Modificaciones', descripcion: 'Las 3 modificaciones al pipeline y su evidencia.', tipo: 'slide', componente: Modificaciones },
-  { id: 'evidencia', ruta: '/evidencia', titulo: 'Evidencia', descripcion: 'Runs, capturas y enlaces por ambiente. Lo que falta aparece como pendiente.', tipo: 'slide', componente: Evidencia },
+  { id: 'evidencia', ruta: '/evidencia', titulo: 'Evidencia', descripcion: 'Runs, capturas y enlaces por ambiente.', tipo: 'slide', componente: Evidencia },
   { id: 'aprendizajes', ruta: '/aprendizajes', titulo: 'Aprendizajes', descripcion: 'Desafíos que tuvimos y qué aprendimos.', tipo: 'slide', componente: Aprendizajes },
   { id: 'alternativas', ruta: '/alternativas', titulo: 'Alternativas', descripcion: 'Decisiones tomadas y alternativas descartadas (respaldo para preguntas).', tipo: 'slide', componente: Alternativas },
   { id: 'guion', ruta: '/guion', titulo: 'Guion', descripcion: 'Guion de 10 minutos para dos voces, con las preguntas probables para los 5 minutos finales.', tipo: 'guion', componente: Guion },

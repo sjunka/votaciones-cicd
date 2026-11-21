@@ -6,7 +6,7 @@ const base = import.meta.env.BASE_URL
 
 export default function Evidencia() {
   return (
-    <Slide titulo="Evidencia" sub="Runs, capturas y enlaces por ambiente. Lo que todavía no existe dice pendiente.">
+    <Slide titulo="Evidencia" sub="Runs, capturas y enlaces por ambiente.">
       <h2 className="text-[28px]">Enlaces</h2>
       <ul className="mt-sm grid gap-sm md:grid-cols-2">
         {enlacesExternos.map((e) => (

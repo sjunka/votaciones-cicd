@@ -10,7 +10,7 @@ export default function Info() {
       <h1 className="text-[48px] leading-[1.1]">Proyecto final CI/CD: votaciones en vivo</h1>
       <p className="mt-md text-[20px]">Integración y Entrega Continua de Software, EAFIT. Equipo: Sergio Alfredo Junca Valero y Valeria Cardona Urrea.</p>
       <p className="mt-xs text-[18px] text-body">
-        Reparto de los 10 minutos de exposición: Sergio abre y lleva artefacto, ramas, arquitectura, rollback y la demo. Valeria lleva pipeline, pruebas, modificaciones y evidencia. Aprendizajes, los dos; cierra Valeria. Es una propuesta, falta confirmar.
+        Reparto de los 10 minutos de exposición: Sergio abre y lleva artefacto, ramas, arquitectura, rollback y la demo. Valeria lleva pipeline, pruebas, modificaciones y evidencia. Aprendizajes, los dos; cierra Valeria.
       </p>
 
       <h2 className="mt-xxl text-[28px]">Vistas</h2>

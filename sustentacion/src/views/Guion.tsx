@@ -35,7 +35,7 @@ export default function Guion() {
         Clic en la imagen abre la pantalla en el paso indicado. Los números de paso de los diagramas son supuestos hasta cerrar los diagramas.
       </p>
       <p className="mt-xs rounded-md border border-warn px-sm py-xs text-[17px] text-ink">
-        Reparto propuesto, falta confirmar. Sergio: intro, resumen, artefacto, ramas, arquitectura, rollback y demo. Valeria: pipeline, pruebas, modificaciones y evidencia. Los dos: aprendizajes y cierre.
+        Reparto. Sergio: intro, resumen, artefacto, ramas, arquitectura, rollback y demo. Valeria: pipeline, pruebas, modificaciones y evidencia. Los dos: aprendizajes y cierre.
       </p>
       <table className="mt-md w-full max-w-[640px] text-left text-[15px]">
         <tbody>

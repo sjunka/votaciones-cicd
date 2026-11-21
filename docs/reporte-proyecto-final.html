@@ -51,9 +51,17 @@
 <p class="sub">Integración y Entrega Continua de Software (SI6008), EAFIT. Equipo: Sergio Junca y Valeria Cardona Urrea. Fecha del reporte: 18 nov 2026 (datos verificados ese día). Presentación: sábado 21 nov, 8 am, 10 minutos de exposición más 5 de preguntas.</p>
 
 <div class="box">
-<b>Estado en una línea:</b> el pipeline corrió completo en AWS. Staging y producción están en la versión 1.0.12 (commit ce132af), el rollback automático y el botón de pánico se probaron con runs reales, y SonarCloud y Docker Hub están activos. Pendiente: <span class="wait">Discord</span> (falta el webhook, no hay mensajes) y <span class="wait">Valeria</span> (invitación sin aceptar, aún no aprueba PR). Pasos en <code>docs/pasos-para-activar.md</code>.
+<b>Estado en una línea:</b> el pipeline corrió completo en AWS. Staging y producción están en la versión 1.0.20 (commit 73f8a9d), el rollback automático y el botón de pánico se probaron con runs reales, y SonarCloud, Docker Hub y los avisos a Discord están activos. Valeria es colaboradora y aprobó el PR 9. Pasos en <code>docs/pasos-para-activar.md</code>.
 </div>
 
+<div class="box" style="border:2px solid #333;padding:10px 14px;margin:12px 0">
+<h2 style="margin-top:0">Resumen para la sustentación</h2>
+<ol>
+<li><b>Flujo del pipeline.</b> El run completo 44348025068 tardó 9 min 42 s. Pasos: build y test, Sonar (Passed, cobertura 98,5 %), luego staging y después producción con aprobación manual. Al final queda una Release SemVer.</li>
+<li><b>Las 3 modificaciones.</b> DevSecOps con gitleaks y Trivy. SemVer con Releases v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20. <code>deploy.yml</code> reutilizable.</li>
+<li><b>Recuperación.</b> Rollback automático: run 44340166676. Botón de pánico: run 44344815777.</li>
+<li><b>Si preguntan.</b> Sonar general tiene Security D por 46 issues de workflows, pero el quality gate pasa. Discord es un extra y está activo en el canal #general. Los PR 5 a 8 se mergearon con <code>--admin</code>; el PR 9 de Valeria fue la primera aprobación real del ruleset <code>proteger-main</code>. Ambos ambientes corren en AWS, en v1.0.20.</li>
+</ol></div>
 <h2>1. Qué pedía el proyecto</h2>
 <p>Un artefacto distinto al de clase, con al menos dos componentes, y un pipeline completo de CI/CD con al menos tres modificaciones o introducciones. Mínimo de CI: checkout, build, pruebas estáticas, unitarias con cobertura y un artefacto versionado. Mínimo de CD: infraestructura como código, despliegue de infra y app en 2 ambientes o más, pruebas pre y post producción, rollback automático ante un smoke fallido y rollback manual (botón de pánico). Vale 25 % de la nota. El profesor pidió un resumen ejecutivo con el contexto de la solución, lo construido y las particularidades de los pipelines.</p>
 
@@ -102,7 +110,7 @@
 <tr><td>Checkout y build</td><td><code>build-and-test</code>: checkout con historial, <code>docker build</code> de las 2 imágenes.</td><td><span class="ok">Corrió</span></td></tr>
 <tr><td>Pruebas estáticas</td><td>Black, Flake8, Pylint, ESLint y SonarCloud. Local: Black y ESLint sin errores, Flake8 sin hallazgos, Pylint 10/10.</td><td><span class="ok">Corrió</span></td></tr>
 <tr><td>Unitarias y cobertura</td><td>pytest con moto (API, 97,32 %) y Vitest (web, 100 %), umbral de 80 %.</td><td><span class="ok">Corrió</span></td></tr>
-<tr><td>Release: artefacto</td><td>Imágenes <code>votaciones-api</code> y <code>votaciones-web</code> con <code>1.0.N</code> y SHA, y Release <code>v1.0.N</code>. Hay v1.0.3, v1.0.8 y v1.0.12.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>Release: artefacto</td><td>Imágenes <code>votaciones-api</code> y <code>votaciones-web</code> con <code>1.0.N</code> y SHA, y Release <code>v1.0.N</code>. Hay v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20.</td><td><span class="ok">Hecho</span></td></tr>
 <tr><td>IaC</td><td><code>infra/</code> con Terraform 1.17.1: ALB, 2 servicios ECS, DynamoDB, logs. <code>fmt</code> y <code>validate</code> corren en CI.</td><td><span class="ok">Validado</span></td></tr>
 <tr><td>Deploy infra y app, 2 ambientes</td><td><code>deploy.yml</code> con workspace <code>staging</code> y <code>production</code>; espera la versión en <code>/api/health</code>.</td><td><span class="ok">Hecho</span></td></tr>
 <tr><td>Pruebas pre-prod</td><td>Integración de la API y E2E con Selenium contra staging (<code>test-staging</code>). El E2E encontró un bug real.</td><td><span class="ok">Hecho</span></td></tr>
@@ -143,6 +151,8 @@
 <tr><th style="width:14%">Run</th><th style="width:14%">Estado</th><th>Qué pasó</th></tr>
 <tr><td>44347524673</td><td><span class="fail">Rojo</span> en CI</td><td>Merge del PR 5, que alinea las exclusiones de cobertura de Sonar con las de Vitest (Sonar mostraba 45,3 % porque contaba <code>pages</code> y <code>components</code>). El quality gate falló por cobertura del código nuevo: Sonar también analizaba la app de <code>sustentacion/</code>. No llegó a AWS.</td></tr>
 <tr><td>44348025068</td><td><span class="ok">Verde</span></td><td>Merge del PR 6, que excluye <code>sustentacion/</code> y <code>docs/</code> del análisis. Quality gate Passed, cobertura 98,5 %, 9 min 42 s con la aprobación. Release v1.0.12, staging y producción en esa versión.</td></tr>
+<tr><td>44809582134</td><td><span class="ok">Verde</span></td><td>Merge del PR 10, rediseño visual. Release v1.0.18.</td></tr>
+<tr><td>44840313582</td><td><span class="ok">Verde</span></td><td>Run manual con el webhook ya cargado. Release v1.0.20, staging y producción en esa versión, aviso en Discord.</td></tr>
 </table>
 
 <h3>Particularidades</h3>
@@ -164,7 +174,7 @@
 <tr><td>2</td><td>SemVer 1.0.N y Releases</td><td>Cada versión que pasa producción queda como Release <code>v1.0.N</code>; el rollback vuelve a esas Releases.</td></tr>
 <tr><td>3</td><td>Workflow reutilizable <code>deploy.yml</code></td><td>Staging, producción, el rollback automático y el botón de pánico llaman al mismo <code>workflow_call</code>. En el Taller 3 cada despliegue era un job propio. Se ve en los jobs <code>deploy-staging / deploy</code> y <code>rollback / deploy</code>.</td></tr>
 </table></div>
-<p class="small">El rollback automático y el botón de pánico son mínimos del enunciado, no modificaciones. Extras: la arquitectura nueva (dos servicios ECS, regla <code>/api/*</code> y DynamoDB) y los avisos a Discord, implementados pero sin webhook todavía (<span class="wait">Pendiente</span>). La prueba de carga con k6 queda como reserva y no está implementada.</p>
+<p class="small">El rollback automático y el botón de pánico son mínimos del enunciado, no modificaciones. Extras: la arquitectura nueva (dos servicios ECS, regla <code>/api/*</code> y DynamoDB) y los avisos a Discord, activos en el canal #general. La prueba de carga con k6 queda como reserva y no está implementada.</p>
 
 <h3>Pruebas</h3>
 <table>
@@ -189,15 +199,15 @@
 <tr><td>API: pytest con moto</td><td><span class="ok">Pasó</span> 21 pruebas, cobertura 97,32 % (mínimo 80 %). Black sin cambios, Flake8 sin hallazgos, Pylint 10,00/10.</td></tr>
 <tr><td>Web: Vitest y ESLint</td><td><span class="ok">Pasó</span> 12 pruebas, 100 % de cobertura. ESLint sin errores.</td></tr>
 <tr><td><code>tests/</code>: integración, E2E y smoke</td><td><span class="ok">Pasó</span> 11 pruebas, contra <code>docker compose</code> y contra staging dentro del pipeline.</td></tr>
-<tr><td>Staging y producción en AWS</td><td><span class="ok">Activos</span> ambos en la versión 1.0.12 (commit ce132af), cuenta 278835524469, us-east-1.</td></tr>
+<tr><td>Staging y producción en AWS</td><td><span class="ok">Activos</span> ambos en la versión 1.0.20 (commit 73f8a9d), cuenta 278835524469, us-east-1.</td></tr>
 <tr><td>Run exitoso, rollback automático, botón de pánico</td><td><span class="ok">Hecho</span> runs 44342859850, 44340166676, 44344815777 y 44345534299 (tabla de la sección 4).</td></tr>
 <tr><td>SonarCloud</td><td><span class="ok">Passed</span> quality gate de <code>sjunka_votaciones-cicd</code> (Sonar way, sobre código nuevo). Análisis automático apagado. Hallazgos abiertos en la sección 6.</td></tr>
-<tr><td>Releases e imágenes</td><td><span class="ok">Hecho</span> Releases v1.0.3, v1.0.8 y v1.0.12. Docker Hub: <code>sjunka/votaciones-api</code> y <code>sjunka/votaciones-web</code> con etiquetas <code>1.0.N</code> y SHA.</td></tr>
-<tr><td>Mensajes de Discord</td><td><span class="wait">Pendiente</span> falta el webhook.</td></tr>
+<tr><td>Releases e imágenes</td><td><span class="ok">Hecho</span> Releases v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20. Docker Hub: <code>sjunka/votaciones-api</code> y <code>sjunka/votaciones-web</code> con etiquetas <code>1.0.N</code> y SHA.</td></tr>
+<tr><td>Mensajes de Discord</td><td><span class="ok">Hecho</span> aviso de la v1.0.20 en #general (run 44840313582).</td></tr>
 </table>
 <table>
 <tr><th style="width:30%">Métrica</th><th>Valor</th></tr>
-<tr><td>Intentos de despliegue a producción</td><td>5: 3 buenos (v1.0.3, v1.0.8 y v1.0.12) y 2 con falla provocada (40 %)</td></tr>
+<tr><td>Intentos de despliegue a producción</td><td>7: 5 buenos (v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20) y 2 con falla provocada (29 %)</td></tr>
 <tr><td>Commit a producción</td><td>9 min 52 s, con la aprobación incluida (run 44342859850)</td></tr>
 <tr><td>Recuperación tras el smoke en rojo</td><td>Unos 3 minutos: smoke rojo a las 16:00 UTC, smoke del rollback en verde a las 16:03 UTC</td></tr>
 </table>
@@ -212,19 +222,17 @@
 <tr><td>Rollback de la imagen, no de la infra</td><td>Un cambio malo de Terraform se corrige con <code>git revert</code> y el pipeline normal.</td></tr>
 <tr><td>HTTP sin TLS</td><td>Como en el Taller 3. Selenium usa <code>--disable-features=HttpsFirstBalancedModeAutoEnable</code> porque Chrome 157 deja en blanco los sitios solo HTTP.</td></tr>
 <tr><td>Llaves permanentes en GitHub Secrets, no OIDC</td><td>Es lo que ya funcionó en el Taller 3 y es lo más corto de montar. Son las llaves del usuario IAM <code>github-cicd-votaciones</code>. OIDC sería lo ideal.</td></tr>
-<tr><td>El rol admin puede saltarse <code>proteger-main</code></td><td>El ruleset exige PR con 1 aprobación y el check <code>build-and-test</code>, y bloquea borrar la rama y el force push, pero el rol admin puede saltarlo. Valeria aún no aceptó la invitación, así que no hay segunda aprobadora.</td></tr>
+<tr><td>El rol admin puede saltarse <code>proteger-main</code></td><td>El ruleset exige PR con 1 aprobación y el check <code>build-and-test</code>, y bloquea borrar la rama y el force push, pero el rol admin puede saltarlo. Valeria ya es colaboradora: su PR 9 fue la primera aprobación real del ruleset (commit 8367a83). Los PR 5 a 8, 10 y 11 se mergearon con <code>--admin</code>.</td></tr>
 <tr><td>Análisis automático de SonarCloud apagado</td><td>El análisis lo corre el job <code>build-and-test</code>, que es el que aplica el quality gate.</td></tr>
 </table>
 <div class="box warn"><b>Hallazgos abiertos de SonarCloud:</b> el análisis general da Security D (46 issues, casi todos de los workflows: acciones sin fijar a un SHA y <code>pip install</code> sin hashes) y Reliability C (7 issues). El quality gate pasa porque mide el código nuevo. No los ocultamos.</div>
-<div class="box warn"><b>Ojo:</b> el rollback exige una Release previa. Ya hay tres (v1.0.3, v1.0.8 y v1.0.12).</div>
+<div class="box warn"><b>Ojo:</b> el rollback exige una Release previa. Ya hay cinco (v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20).</div>
 
 <h2>7. Qué sigue</h2>
 <ol>
-<li>Discord: Sergio inicia sesión, crea el webhook y lo guarda como <code>DISCORD_WEBHOOK_URL</code>; después se prueba que llegan los avisos.</li>
-<li>Valeria acepta la invitación, se agrega como segunda revisora de <code>production</code> y aprueba un PR.</li>
 <li>Definir con el profesor si hace falta algo en Interactiva.</li>
 <li>Presentar el sábado 21 de noviembre.</li>
-<li>Destruir todo después de exponer: <code>terraform destroy</code> en los workspaces <code>production</code> y <code>staging</code>, vaciar y borrar el bucket del estado, borrar <code>LabRole</code> y el usuario IAM <code>github-cicd-votaciones</code> con sus llaves, y revocar los tokens de Docker Hub y SonarCloud (<code>EAFIT_PROYECTO</code>). Mientras tanto corren 2 ALB y 4 servicios Fargate, unos US$3 al día.</li>
+<li>Destruir todo después de exponer: <code>terraform destroy</code> en los workspaces <code>production</code> y <code>staging</code>, vaciar y borrar el bucket del estado, borrar <code>LabRole</code> y el usuario IAM <code>github-cicd-votaciones</code> con sus llaves, revocar los tokens de Docker Hub y SonarCloud (<code>EAFIT_PROYECTO</code>) y borrar el servidor de Discord <code>votaciones-cicd</code> con el secreto <code>DISCORD_WEBHOOK_URL</code>. Mientras tanto corren 2 ALB y 4 servicios Fargate, unos US$3 al día.</li>
 </ol>
 
 <h2>8. Los 10 puntos del enunciado</h2>

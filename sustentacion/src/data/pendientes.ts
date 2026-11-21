@@ -1,5 +1,5 @@
 /**
- * Datos de ejecución del proyecto, tomados del 2026-11-18. Solo Discord sigue sin activar.
+ * Datos de ejecución del proyecto, tomados del 2026-11-18. Discord activo desde el 2026-11-20.
  * null = pendiente. La app muestra un chip "pendiente" y nunca inventa un valor.
  * Cuando haya el dato real, se escribe aquí y no se toca nada más.
  */
@@ -12,7 +12,7 @@ export const URL_RUN_EXITOSO: string | null = 'https://github.com/sjunka/votacio
 export const URL_RUN_ROLLBACK_AUTOMATICO: string | null = 'https://github.com/sjunka/votaciones-cicd/actions/runs/44340166676'
 export const URL_RUN_BOTON_PANICO: string | null = 'https://github.com/sjunka/votaciones-cicd/actions/runs/44344815777'
 export const URL_RELEASES: string | null = 'https://github.com/sjunka/votaciones-cicd/releases'
-export const URL_DISCORD: string | null = null
+export const URL_DISCORD: string | null = 'https://discord.gg/jcHPz3tJ2'
 
 /** Rutas de capturas dentro de public/. */
 export const capturas: { titulo: string; ruta: string | null }[] = [
@@ -25,7 +25,7 @@ export const capturas: { titulo: string; ruta: string | null }[] = [
   { titulo: 'Página de Releases', ruta: 'evidencias/releases.png' },
   { titulo: 'SonarCloud: quality gate Passed y cobertura 98,5 %', ruta: 'evidencias/sonarcloud.png' },
   { titulo: 'Docker Hub: imágenes con etiquetas 1.0.N y SHA', ruta: 'evidencias/dockerhub.png' },
-  { titulo: 'Mensajes en el canal de Discord', ruta: null },
+  { titulo: 'Mensajes en el canal de Discord', ruta: 'evidencias/discord.png' },
 ]
 
 /** Métricas DORA del proyecto, sacadas de los runs (gh run list). Solo datos reales. */
@@ -48,5 +48,5 @@ export const enlacesExternos: { titulo: string; url: string | null }[] = [
   { titulo: 'SonarCloud', url: URL_SONARCLOUD },
   { titulo: 'Run donde el rollback no corrió (condición corregida en el PR 3)', url: 'https://github.com/sjunka/votaciones-cicd/actions/runs/44336684960' },
   { titulo: 'PR 3: corrige la condición del rollback', url: 'https://github.com/sjunka/votaciones-cicd/pull/3' },
-  { titulo: 'Canal de Discord', url: URL_DISCORD },
+  { titulo: 'Servidor de Discord (canal #general)', url: URL_DISCORD },
 ]

@@ -1,6 +1,6 @@
 # Pipeline
 
-Autor: Sergio Junca. Estado al 2026-11-18: el pipeline corrió en GitHub Actions contra AWS. Discord está `pendiente` (falta el webhook).
+Autor: Sergio Junca. Estado al 2026-11-20: el pipeline corrió en GitHub Actions contra AWS, staging y producción en v1.0.20. Discord activo: servidor votaciones-cicd, webhook en #general; el run 44840313582 publicó el aviso de la v1.0.20.
 
 Orquestador: GitHub Actions. Contrastado con los archivos de `.github/workflows/` el 2026-11-18. Archivos en `.github/workflows/`:
 
@@ -127,9 +127,9 @@ Además, el circuit breaker de ECS vuelve a la tarea anterior si la nueva no que
 | `DOCKERHUB_USERNAME` | variable | `build-and-test`, `deploy.yml` |
 | `SONAR_HOST_URL` | variable | `build-and-test` |
 
-Ambientes: `staging`, `production` (revisor `sjunka`; `valri2104` invitada como colaboradora, invitación pendiente de aceptar, cuando acepte se agrega como segunda revisora) y `production-rollback` (sin revisores).
+Ambientes: `staging`, `production` (revisor `sjunka`; `valri2104` es colaboradora y aprobó el PR 9) y `production-rollback` (sin revisores).
 
-Cargados al 2026-11-18: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN`, `DOCKERHUB_USERNAME` y `SONAR_HOST_URL`. No está `DISCORD_WEBHOOK_URL`: los avisos a Discord (un extra, no una de las tres modificaciones) están implementados y no fallan sin webhook, pero todavía no hay mensajes.
+Cargados al 2026-11-20: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN`, `DISCORD_WEBHOOK_URL`, `DOCKERHUB_USERNAME` y `SONAR_HOST_URL`. Los avisos a Discord son un extra, no una de las tres modificaciones.
 
 ## Ejecuciones reales (2026-11-18)
 
@@ -155,11 +155,10 @@ PR 5 (alinea las exclusiones de cobertura de Sonar con las de Vitest; Sonar most
 
 ## Decisiones que se apartan
 
-- El rol admin puede saltarse el ruleset `proteger-main` (PR con 1 aprobación, check `build-and-test`, sin borrar ni force push). Valeria todavía no aceptó la invitación, así que no hay segunda aprobadora.
+- El rol admin puede saltarse el ruleset `proteger-main` (PR con 1 aprobación, check `build-and-test`, sin borrar ni force push). Los PR 5 a 8 y 10 a 11 se mergearon con `--admin`; el PR 9 de Valeria fue la primera aprobación real.
 - El análisis automático de SonarCloud está apagado: el análisis lo hace el job `build-and-test`.
 - Las llaves de AWS son permanentes (usuario IAM `github-cicd-votaciones`), no OIDC.
 
 ## Hallazgos abiertos
 
 - SonarCloud, análisis general: Security D (46 issues, casi todos de los workflows: acciones sin fijar a un SHA y `pip install` sin hashes) y Reliability C (7). El quality gate (Sonar way, sobre código nuevo) pasa.
-- Discord sin webhook.

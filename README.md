@@ -2,7 +2,7 @@
 
 Votación en vivo con QR. Alguien crea una encuesta, la pantalla muestra un código QR, el público lo escanea con el celular, vota y las barras de resultado se mueven cada 2 segundos. Es el proyecto final del curso Integración y Entrega Continua de Software (SI6008, EAFIT) y reutiliza el pipeline de los talleres 1 a 3.
 
-Autor: Sergio Junca. Estado al 2026-11-18: el pipeline corrió completo en AWS (staging y producción en la versión 1.0.8), con rollback automático y botón de pánico probados. Falta Discord (`pendiente`).
+Autor: Sergio Junca. Estado al 2026-11-20: el pipeline corrió completo en AWS (staging y producción en la versión 1.0.20), con rollback automático y botón de pánico probados, y avisos a Discord activos.
 
 ## Integrantes
 
@@ -98,7 +98,7 @@ Las tres modificaciones respecto al Taller 3:
 2. SemVer `1.0.N` y GitHub Releases como puntos de restauración.
 3. Workflow reutilizable `deploy.yml`: staging, producción, el rollback automático y el botón de pánico lo llaman.
 
-Extras: la arquitectura nueva (dos servicios ECS, regla `/api/*` del balanceador y DynamoDB) y los avisos a Discord, implementados y a la espera del webhook.
+Extras: la arquitectura nueva (dos servicios ECS, regla `/api/*` del balanceador y DynamoDB) y los avisos a Discord, activos en el canal #general.
 
 ## Estrategia de ramas
 
@@ -122,7 +122,7 @@ Se crean en GitHub, Settings, Secrets and variables, Actions. Los valores no van
 | `DOCKERHUB_USERNAME` | variable | nombre de usuario de Docker Hub |
 | `SONAR_HOST_URL` | variable | `https://sonarcloud.io` |
 
-Estado al 2026-11-18: están cargados `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN`, `DOCKERHUB_USERNAME` y `SONAR_HOST_URL`. Falta `DISCORD_WEBHOOK_URL` (`pendiente`: Discord pide iniciar sesión para crear el webhook).
+Estado al 2026-11-20: están cargados todos: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN`, `DISCORD_WEBHOOK_URL`, `DOCKERHUB_USERNAME` y `SONAR_HOST_URL`.
 
 Ambientes de GitHub: `staging`, `production` (revisor `sjunka`; `valri2104` está invitada como colaboradora y la invitación sigue pendiente, cuando acepte se agrega como segunda revisora) y `production-rollback` (sin revisores). Los pasos completos están en `docs/pasos-para-activar.md`.
 
@@ -132,7 +132,7 @@ Ambientes de GitHub: `staging`, `production` (revisor `sjunka`; `valri2104` est�
 |---|---|
 | Repositorio | https://github.com/sjunka/votaciones-cicd |
 | Sustentación | https://sjunka.github.io/votaciones-cicd/ |
-| Releases | https://github.com/sjunka/votaciones-cicd/releases (v1.0.3, v1.0.8 y v1.0.12 al 2026-11-18) |
+| Releases | https://github.com/sjunka/votaciones-cicd/releases (v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20 al 2026-11-20) |
 | Actions | https://github.com/sjunka/votaciones-cicd/actions |
 | Staging | http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com |
 | Producción | http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com |
@@ -153,7 +153,7 @@ Las capturas están en `sustentacion/public/evidencias/`.
 ## Hallazgos abiertos
 
 - SonarCloud, análisis general: Security D (46 issues, casi todos de los workflows: acciones sin fijar a un SHA y `pip install` sin hashes) y Reliability C (7). El quality gate (Sonar way, sobre código nuevo) pasa.
-- Discord: sin webhook no hay mensajes. `pendiente`.
+- Discord: activo, aviso de la v1.0.20 en el run 44840313582.
 - Valeria no ha aceptado la invitación, así que aún no aprueba PR ni producción.
 
 ## Destruir todo

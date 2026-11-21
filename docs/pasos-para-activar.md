@@ -4,7 +4,7 @@ Autor: Sergio Junca. Estado al 2026-11-18: casi todo está hecho. Los pasos de a
 
 ## Lo que falta
 
-1. Discord: crear el webhook (hay que iniciar sesión en Discord) y guardarlo con `gh secret set DISCORD_WEBHOOK_URL --repo sjunka/votaciones-cicd`. Después, probar que llegan los avisos (paso 12).
+1. Discord: hecho el 2026-11-20 (servidor votaciones-cicd, webhook en #general, aviso de la v1.0.20).
 2. Valeria acepta la invitación en https://github.com/sjunka/votaciones-cicd/invitations. Luego agregarla como segunda revisora del ambiente `production` y que apruebe un PR.
 3. Definir con el profesor si hace falta algo más en Interactiva.
 4. Después de exponer: destruir todo y revocar tokens (pasos 24 a 26).
@@ -16,7 +16,7 @@ Autor: Sergio Junca. Estado al 2026-11-18: casi todo está hecho. Los pasos de a
 - Docker Hub: token y variable `DOCKERHUB_USERNAME`; repos `sjunka/votaciones-api` y `sjunka/votaciones-web` con etiquetas `1.0.N` y SHA (paso 8).
 - SonarCloud: proyecto `sjunka_votaciones-cicd`, análisis automático apagado, quality gate Passed; `SONAR_TOKEN` y `SONAR_HOST_URL` cargados. El primer análisis dio Quality Gate NONE y se relanzó con `gh run rerun --failed` (pasos 9 a 11).
 - Ambientes `staging`, `production` (revisor `sjunka`) y `production-rollback` (sin revisores), y ruleset `proteger-main` activo (pasos 13 y 14). La invitación a Valeria está enviada, falta que la acepte (paso 2).
-- Primer run, runs verdes y 2 Releases (v1.0.3, v1.0.8 y v1.0.12) (pasos 16 a 18). Run completo en verde de 9 min 52 s.
+- Primer run, runs verdes y Releases (v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20) (pasos 16 a 18). Run completo en verde de 9 min 52 s.
 - Rollback automático probado con una falla de demostración (run 44340166676) y botón de pánico probado (runs 44344815777 y 44345534299) (pasos 19 y 20).
 - Capturas en `sustentacion/public/evidencias/` (paso 21). Enlaces del README y del reporte actualizados (paso 23).
 
@@ -137,5 +137,5 @@ Autor: Sergio Junca. Estado al 2026-11-18: casi todo está hecho. Los pasos de a
 ## I. Al terminar
 
 24. Destruir todo (ver `README.md`, sección "Destruir todo"): `terraform destroy` en `production` y en `staging`, vaciar y borrar el bucket `tfstate-votaciones-sjunka`, borrar el usuario IAM de CI con sus llaves y el rol `LabRole`.
-25. Revocar los tokens: Docker Hub, SonarCloud y el webhook de Discord.
+25. Revocar los tokens: Docker Hub y SonarCloud. Borrar el servidor de Discord votaciones-cicd (Server Settings, Delete Server) y `gh secret delete DISCORD_WEBHOOK_URL -R sjunka/votaciones-cicd`.
 26. Borrar los secretos del repo si se va a dejar público: `gh secret delete <NOMBRE> --repo sjunka/votaciones-cicd`.
