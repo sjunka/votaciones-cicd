@@ -5,11 +5,8 @@ import { criterios } from '../data/criterios'
 
 const base = import.meta.env.BASE_URL
 const colorRubrica = '#cc785c'
-// Íconos Material (checklist y slideshow), 24x24
-const icono = {
-  rubrica: 'M22 7h-9v2h9V7zm0 8h-9v2h9v-2zM5.54 11L2 7.46l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41L5.54 11zm0 8L2 15.46l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41L5.54 19z',
-  guion: 'M10 8v8l5-4-5-4zm9-5H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z',
-}
+// Ícono Material menu_book (libro), 24x24: vuelve a la sustentación
+const libro = 'M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z'
 
 interface Ficha { titulo: string; captura: string; clave: string[]; idea: string; etiqueta: string; color: string; meta: string }
 
@@ -104,12 +101,14 @@ export default function Memofichas() {
         onClick={cambiar}
         onTouchStart={parar}
         onTouchEnd={parar}
-        aria-label={mazo === 'guion' ? 'Ver los 14 criterios de este momento' : 'Volver al guion'}
-        title={mazo === 'guion' ? 'Criterios' : 'Guion'}
+        aria-label={mazo === 'guion' ? 'Ver los 14 criterios de este momento' : 'Volver a la sustentación'}
+        title={mazo === 'guion' ? '14 criterios' : 'Sustentación'}
         className="fixed bottom-[16px] right-[16px] grid h-14 w-14 place-items-center rounded-2xl text-white shadow-lg active:scale-95"
         style={{ background: mazo === 'guion' ? colorRubrica : colorQuien.Sergio }}
       >
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d={icono[mazo === 'guion' ? 'rubrica' : 'guion']} /></svg>
+        {mazo === 'guion'
+          ? <span className="text-[22px] font-bold leading-none">14</span>
+          : <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d={libro} /></svg>}
       </button>
     </div>
   )
