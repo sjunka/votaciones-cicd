@@ -51,8 +51,9 @@ h1 {
 .env::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: 0.6; }
 .banner.staging .env { background: var(--warn); color: #3d3000; }
 .banner.production .env { background: var(--ok); color: #fff; }
-.version { font-size: 0.85rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); text-decoration: none; }
-.version:hover { color: var(--ink); }
+.version { padding: 6px 16px; border-radius: 999px; font-size: 1.1rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; text-decoration: none; }
+.version:empty { display: none; }
+.version:hover { filter: brightness(1.1); }
 
 /* Formularios */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 28px; box-shadow: var(--shadow); }
