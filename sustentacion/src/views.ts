@@ -5,6 +5,7 @@ import Rubrica from './views/Rubrica'
 import Artefacto from './views/Artefacto'
 import Ramas from './views/Ramas'
 import Pipeline from './views/Pipeline'
+import PipelineVivo from './views/PipelineVivo'
 import Arquitectura from './views/Arquitectura'
 import Pruebas from './views/Pruebas'
 import Rollback from './views/Rollback'
@@ -31,6 +32,7 @@ export const vistas: Vista[] = [
   { id: 'artefacto', ruta: '/artefacto', titulo: 'Artefacto', descripcion: 'La app de votación en vivo: propósito, funcionalidades y complejidad.', tipo: 'slide', componente: Artefacto },
   { id: 'ramas', ruta: '/ramas', titulo: 'Ramas', descripcion: 'Trunk-based, versiones 1.0.N y qué corre en cada rama o evento.', tipo: 'diagrama', componente: Ramas },
   { id: 'pipeline', ruta: '/pipeline', titulo: 'Pipeline', descripcion: 'Flujograma de CI y CD con la herramienta de cada paso.', tipo: 'diagrama', componente: Pipeline },
+  { id: 'pipeline-vivo', ruta: '/pipeline-vivo', titulo: 'En vivo', descripcion: 'El pipeline real corriendo en GitHub Actions: etapa, paso y tiempo, con QR para seguirlo desde el celular.', tipo: 'slide', componente: PipelineVivo },
   { id: 'arquitectura', ruta: '/arquitectura', titulo: 'Arquitectura', descripcion: 'ALB, dos servicios ECS, DynamoDB y los servicios de apoyo.', tipo: 'diagrama', componente: Arquitectura },
   { id: 'pruebas', ruta: '/pruebas', titulo: 'Pruebas', descripcion: 'Qué prueba cada suite, en qué ambiente y por qué.', tipo: 'slide', componente: Pruebas },
   { id: 'rollback', ruta: '/rollback', titulo: 'Rollback', descripcion: 'Rollback automático y botón de pánico.', tipo: 'diagrama', componente: Rollback },

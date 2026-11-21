@@ -134,8 +134,8 @@ Ambientes de GitHub: `staging`, `production` (revisor `sjunka`; `valri2104` est�
 | Sustentación | https://sjunka.github.io/votaciones-cicd/ |
 | Releases | https://github.com/sjunka/votaciones-cicd/releases (v1.0.3, v1.0.8, v1.0.12, v1.0.18 y v1.0.20 al 2026-11-20) |
 | Actions | https://github.com/sjunka/votaciones-cicd/actions |
-| Staging | http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com |
-| Producción | http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com |
+| Staging | https://d1y5ajf6tjhnl7.cloudfront.net |
+| Producción | https://d1ypwe0ox2c5in.cloudfront.net |
 | SonarCloud | proyecto `sjunka_votaciones-cicd`, quality gate Passed |
 | Docker Hub | `sjunka/votaciones-api` y `sjunka/votaciones-web` |
 
