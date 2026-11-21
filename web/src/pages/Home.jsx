@@ -27,7 +27,7 @@ export default function Home() {
 
   return (
     <form onSubmit={submit} className="create">
-      <h1>Pregunta algo a la sala</h1>
+      <h1>Pregunta algo al jurado</h1>
       <p className="lede">Crea la encuesta, proyecta el QR y mira cómo llegan los votos en vivo.</p>
       <div className="card">
         <label htmlFor="q">Pregunta</label>
