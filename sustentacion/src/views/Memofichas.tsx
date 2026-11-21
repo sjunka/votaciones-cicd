@@ -58,7 +58,7 @@ export default function Memofichas() {
   return (
     <div
       className="fixed inset-0 z-50 flex select-none flex-col bg-canvas text-ink"
-      onTouchStart={(e) => { x0.current = e.touches[0].clientX }}
+      onTouchStart={(e) => { x0.current = e.touches[0].clientX; if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {}) }}
       onTouchEnd={(e) => {
         if (x0.current === null) return
         const dx = e.changedTouches[0].clientX - x0.current
